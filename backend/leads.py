@@ -178,6 +178,7 @@ def handle_lead(
     webhook_url: str,
     send: Callable[[str, dict], int] = _post_with_httpx,
     pending_path: Path = PENDING_FILE,
+    demo: bool = False,
 ) -> dict:
     """What /lead does once the request has passed validation."""
     # A filled-in hidden field means a bot, not a person. Answer exactly as for
@@ -185,6 +186,14 @@ def handle_lead(
     if lead.website and lead.website.strip():
         print("[lead] discarded: hidden field was filled in")
         return {"status": "received", "lead_id": uuid.uuid4().hex[:12]}
+
+    # Demo mode (the public live site, Task 3.3). The details have already
+    # passed every check, which is what the demo shows. They are then
+    # dropped: not stored, not sent, not printed. "demo": True lets the
+    # widget tell the visitor exactly that.
+    if demo:
+        print("[lead] demo mode: details were valid and have been discarded")
+        return {"status": "received", "lead_id": uuid.uuid4().hex[:12], "demo": True}
 
     record = build_record(lead)
     destination = forward_lead(record, webhook_url, send, pending_path)

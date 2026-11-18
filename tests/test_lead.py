@@ -1,5 +1,5 @@
 r"""
-test_lead.py - Task 2.3, unit tests for backend/leads.py
+test_lead.py - Tasks 2.3 and 3.3, unit tests for backend/leads.py
 
 No server, no API key and no network needed. Run from the project folder:
 
@@ -192,3 +192,35 @@ def test_lead_23_pending_file_is_gitignored():
     """NFR-09: leads must never be committed."""
     ignore = (Path(__file__).resolve().parent.parent / ".gitignore").read_text(encoding="utf-8")
     assert "backend/leads/" in ignore
+
+
+# --- LEAD-24..26: demo mode for the public live site (Task 3.3) -------------
+
+def test_lead_24_demo_mode_keeps_nothing(tmp_path):
+    sent = []
+    path = tmp_path / "p.jsonl"
+    reply = handle_lead(lead(), "https://n8n.example/webhook",
+                        send=lambda u, r: sent.append(r) or 200,
+                        pending_path=path, demo=True)
+    assert reply["status"] == "received" and reply["demo"] is True
+    assert sent == [], "demo mode must not send anything to n8n"
+    assert not path.exists(), "demo mode must not write the fallback file"
+
+
+def test_lead_25_demo_mode_reply_and_console_have_no_personal_details(tmp_path, capsys):
+    reply = handle_lead(lead(), "", pending_path=tmp_path / "p.jsonl", demo=True)
+    printed = capsys.readouterr().out
+    assert "demo mode" in printed
+    for detail in ["Ayesha", "03001234567", "ayesha@example.com"]:
+        assert detail not in json.dumps(reply)
+        assert detail not in printed
+
+
+def test_lead_26_demo_mode_still_validates():
+    """Bad details are still refused in demo mode: validation runs first."""
+    assert "10 to 15 digits" in error_text(phone="abc")
+
+
+def test_lead_27_normal_mode_reply_has_no_demo_flag(tmp_path):
+    reply = handle_lead(lead(), "", pending_path=tmp_path / "p.jsonl")
+    assert "demo" not in reply

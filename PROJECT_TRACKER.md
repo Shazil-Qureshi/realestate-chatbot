@@ -42,7 +42,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 |---|---|---|
 | 3.1 | Git and GitHub repository — <https://github.com/Shazil-Qureshi/realestate-chatbot> (public), `docs/14_github.md`; private commit email; GIT-01..05 and AC-8 Pass (18 Nov, commit `34e6139`) | Completed |
 | 3.2 | Dockerfile — `Dockerfile`, `backend/start.sh`, `.dockerignore`, `.gitattributes`, `docs/15_docker.md`; index built into the image (NFR-06); DOCK-01..03 Pass; first real build in 3.3 (DOCK-04..08) | In Progress |
-| 3.3 | Backend on Hugging Face Spaces | Not Started |
+| 3.3 | Backend on Hugging Face Spaces — decided: live leads in demo mode (checked, then discarded); `LEADS_DEMO_MODE`, LEAD-24..27 Pass here; Space setup in progress | In Progress |
 | 3.4 | Website on GitHub Pages (Actions workflow) | Not Started |
 | 3.5 | CORS and rate limiting | Not Started |
 | 3.6 | Live tests and security checklist | Not Started |

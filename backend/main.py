@@ -68,6 +68,18 @@ EMBED_MODEL = os.getenv("GEMINI_EMBEDDING_MODEL", "").strip()
 # then leads are kept in backend/leads/pending.jsonl instead (see leads.py).
 N8N_WEBHOOK_URL = os.getenv("N8N_WEBHOOK_URL", "").strip()
 
+# Demo mode for leads (Task 3.3). The public live site has no n8n it can
+# reach, so there the form checks the details and then keeps nothing.
+# Set LEADS_DEMO_MODE=true on Hugging Face; leave it unset on the laptop.
+LEADS_DEMO_MODE = os.getenv("LEADS_DEMO_MODE", "").strip().lower() in ("1", "true", "yes")
+
+if LEADS_DEMO_MODE:
+    LEADS_GO_TO = "nowhere (demo mode: checked, then discarded)"
+elif N8N_WEBHOOK_URL:
+    LEADS_GO_TO = "n8n"
+else:
+    LEADS_GO_TO = "local file (n8n not set up)"
+
 ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
@@ -217,7 +229,8 @@ def health():
         "chat_model": CHAT_MODEL,
         "embedding_model": EMBED_MODEL,
         # Says where leads go without revealing the webhook address itself.
-        "leads_go_to": "n8n" if N8N_WEBHOOK_URL else "local file (n8n not set up)",
+        "leads_go_to": LEADS_GO_TO,
+        "leads_demo": LEADS_DEMO_MODE,
     }
 
 
@@ -327,7 +340,7 @@ def lead(request: LeadIn):
     A valid lead is sent to n8n, or kept on disk if n8n can't take it, so the
     visitor is always told it was received and no lead is ever lost.
     """
-    return handle_lead(request, N8N_WEBHOOK_URL)
+    return handle_lead(request, N8N_WEBHOOK_URL, demo=LEADS_DEMO_MODE)
 
 
 # ---------------------------------------------------------------------------
@@ -344,7 +357,7 @@ if __name__ == "__main__":
     print(f"  Knowledge base: {CHUNK_COUNT} chunks")
     print(f"  Chat model:     {CHAT_MODEL}")
     print(f"  Prompt version: {PROMPT_VERSION}")
-    print(f"  Leads go to:    {'n8n' if N8N_WEBHOOK_URL else 'backend/leads/pending.jsonl (n8n not set up)'}")
+    print(f"  Leads go to:    {LEADS_GO_TO}")
     print(f"  Allowed origins: {ALLOWED_ORIGINS or DEFAULT_ORIGINS}")
     print()
     print("  Open http://127.0.0.1:8000/docs to try it.")

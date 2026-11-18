@@ -417,6 +417,16 @@
     });
   }
 
+  // Whether the server is in demo mode (the public live site keeps no
+  // leads). Asked once, from /health, so the visitor is told BEFORE typing
+  // anything. If the question fails, the normal wording is used and the
+  // server's reply to the form still says what really happened.
+  var leadsDemo = false;
+  fetch(API_URL + "/health")
+    .then(function (response) { return response.json(); })
+    .then(function (body) { leadsDemo = body.leads_demo === true; })
+    .catch(function () {});
+
   function offerHandoff() {
     if (leadOpen) return;
     leadOpen = true;
@@ -425,12 +435,16 @@
     var suggestions = log.querySelector(".chat-suggestions");
     if (suggestions) suggestions.remove();
 
-    addMessage("bot",
-      "I can pass your details to the Bella Real Estate team so someone can " +
-      "call you back. Would you like to share your name and phone number?");
+    var yesLabel = leadsDemo ? "Try the form" : "Yes, share my details";
+    addMessage("bot", leadsDemo
+      ? "This is a live demo, so no one will call you back. You can still try " +
+        "the contact form: it checks your details, then throws them away. " +
+        "Nothing is stored or sent. Would you like to try it?"
+      : "I can pass your details to the Bella Real Estate team so someone can " +
+        "call you back. Would you like to share your name and phone number?");
 
     var choice = el("div", { class: "chat-suggestions" });
-    var yes = el("button", { type: "button", class: "chat-chip" }, "Yes, share my details");
+    var yes = el("button", { type: "button", class: "chat-chip" }, yesLabel);
     var no = el("button", { type: "button", class: "chat-chip" }, "Not now");
     choice.appendChild(yes);
     choice.appendChild(no);
@@ -440,7 +454,7 @@
 
     yes.addEventListener("click", function () {
       choice.remove();
-      addMessage("user", "Yes, share my details");
+      addMessage("user", yesLabel);
       showLeadForm();
     });
     no.addEventListener("click", function () {
@@ -480,9 +494,11 @@
       autocomplete: "off", class: "lead-trap", "aria-hidden": "true" });
     card.appendChild(trap);
 
-    card.appendChild(el("p", { class: "lead-privacy" },
-      "Your details go to the owner of this demo site and are used only to " +
-      "reply to this enquiry. Bella Real Estate is a fictional company."));
+    card.appendChild(el("p", { class: "lead-privacy" }, leadsDemo
+      ? "Live demo: your details are checked, then discarded. Nothing is " +
+        "stored or sent. Bella Real Estate is a fictional company."
+      : "Your details go to the owner of this demo site and are used only to " +
+        "reply to this enquiry. Bella Real Estate is a fictional company."));
 
     var buttons = el("div", { class: "lead-buttons" });
     var submit = el("button", { type: "submit", class: "chat-send" }, "Send my details");
@@ -543,6 +559,15 @@
           if (result.status === 200 && result.body.status === "received") {
             card.remove();
             var first = name.value.trim().split(/\s+/)[0];
+            if (result.body.demo === true) {
+              addMessage("bot",
+                "Thank you, " + first + ". Your details passed every check, and " +
+                "have now been discarded: this live demo keeps nothing.\n\n" +
+                "In the full setup they would be added to the agency's Google " +
+                "Sheet and the agent would get an email.");
+              closeLead();
+              return;
+            }
             addMessage("bot",
               "Thank you, " + first + ". Your details have been received " +
               "(reference " + result.body.lead_id + ").\n\n" +
