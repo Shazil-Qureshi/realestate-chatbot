@@ -1,0 +1,20 @@
+# Files Docker must not copy into the image (see docs/15_docker.md).
+
+# Secrets and personal data
+backend/.env
+**/.env
+backend/leads
+
+# Built again inside the image; a laptop copy would be the wrong one
+backend/chroma_db
+.venv
+**/__pycache__
+.pytest_cache
+
+# Not needed by the server
+.git
+docs
+tests
+web
+n8n
+test_output*.txt

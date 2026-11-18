@@ -294,12 +294,15 @@ def main():
 
     from dotenv import load_dotenv
 
+    # On your laptop the settings come from backend/.env. In the Docker
+    # container (Hugging Face) there is no .env file: the settings arrive as
+    # environment variables instead, so a missing file is not an error.
     env_path = BACKEND_DIR / ".env"
-    if not env_path.exists():
-        bad("backend/.env not found", "Complete Task 1.5 first.")
-        sys.exit(1)
-
-    load_dotenv(env_path, override=True)
+    if env_path.exists():
+        load_dotenv(env_path, override=True)
+        info("Settings read from backend/.env")
+    else:
+        info("No backend/.env - using environment variables (Docker / Hugging Face)")
 
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
     embed_model = os.getenv("GEMINI_EMBEDDING_MODEL", "").strip()

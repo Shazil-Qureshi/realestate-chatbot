@@ -41,7 +41,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 | ID | Task | Status |
 |---|---|---|
 | 3.1 | Git and GitHub repository — <https://github.com/Shazil-Qureshi/realestate-chatbot> (public), `docs/14_github.md`; private commit email; GIT-01..05 and AC-8 Pass (18 Nov, commit `34e6139`) | Completed |
-| 3.2 | Dockerfile | Not Started |
+| 3.2 | Dockerfile — `Dockerfile`, `backend/start.sh`, `.dockerignore`, `.gitattributes`, `docs/15_docker.md`; index built into the image (NFR-06); DOCK-01..03 Pass; first real build in 3.3 (DOCK-04..08) | In Progress |
 | 3.3 | Backend on Hugging Face Spaces | Not Started |
 | 3.4 | Website on GitHub Pages (Actions workflow) | Not Started |
 | 3.5 | CORS and rate limiting | Not Started |
@@ -63,7 +63,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 |---|---|---|---|
 | DEP-05 | `requirements.lock.txt` encoding | 1.4 | **Closed 16 Nov** — regenerated as ASCII and verified |
 | API-05 | Confirm `.env` never reaches Git | 1.5 | **Closed 18 Nov** — fresh clone of the public repository has no `.env` or key (`docs/14_github.md`) |
-| ING-06 | Confirm re-running ingestion does not duplicate chunks | 1.6 | Open — one extra run of `python backend/ingest.py` |
+| ING-06 | Confirm re-running ingestion does not duplicate chunks | 1.6 | **Closed 18 Nov** — re-run: 56 already stored, 0 to go (DOCK-03) |
 | RET-01 | Vector search ignores hard constraints such as city (Rawalpindi ranked above Islamabad) | 1.6 | **Mitigated** — CHAT-03 passed on 16 Nov with `TOP_K = 5` plus rule 3. One passing question is not proof for all; re-check if new listings are added. |
 | RET-03 | Retrieval recall: BRE-S-302 missed for a 3-bedroom question | 1.8 | **Mitigated** — Rawalpindi file split by sale/rent, `TOP_K` 8, completeness rule 8. CHAT-11 passes, but BRE-S-302 sits at rank 8 of 8. Structural fix (metadata filtering) listed for Stage 4. |
 | THR-01 | Relevance threshold | 1.8 | Measured: out-of-scope ≈ 0.44, in-scope ≤ 0.29. A 0.40 cut-off is now justifiable as a quota saving. Deferred to Stage 3; it cannot detect in-scope gaps and adds a false-rejection risk. |
