@@ -54,7 +54,7 @@ Server internals, such as the exception text in a 503, are never shown.
 
 **The backend address lives in one place.** `API_URL` at the top of
 `chat.js`, overridable with `window.BELLA_API_URL`. Stage 3 changes that one
-value to the Hugging Face address.
+value to the Render address (Hugging Face became paid; see `docs/16_render.md`).
 
 **Suggested questions.** Three buttons in the opening message, because an empty
 box makes people guess what the assistant can do.

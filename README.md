@@ -1,15 +1,3 @@
----
-title: Bella Real Estate Assistant
-emoji: 🏠
-colorFrom: green
-colorTo: yellow
-sdk: docker
-app_port: 7860
-short_description: RAG support chatbot for a fictional real estate agency
-license: mit
-pinned: false
----
-
 # AI Real Estate Customer Support Chatbot
 
 An AI chatbot for a fictional real estate company. It answers customer questions
@@ -59,14 +47,13 @@ Without n8n the chatbot still works, and leads are saved to
 
 ## Live demo
 
-The backend runs on Hugging Face Spaces (see [`docs/16_huggingface.md`](docs/16_huggingface.md)).
+The backend runs on Render's free tier (see [`docs/16_render.md`](docs/16_render.md)).
+It sleeps after 15 minutes without visitors, so the first answer after a quiet
+spell can take about a minute.
+
 On the live demo, the contact form checks a visitor's details and then
 discards them (`LEADS_DEMO_MODE=true`). The full lead flow to Google Sheets
 and email runs with n8n on the developer's laptop.
-
-> The block between the `---` lines at the top of this file is settings for
-> Hugging Face Spaces (`sdk: docker`, port 7860). GitHub shows it as a small
-> table.
 
 ## Documentation
 

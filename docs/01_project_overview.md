@@ -47,8 +47,8 @@ them to Gemini, and Gemini answers using only those chunks.
 | Automation | n8n | Receives leads, writes to Sheets, sends email |
 | Storage | Google Sheets | Lead list |
 | Notification | Gmail | Email alert to the agent |
-| Packaging | Docker | Runs the backend on Hugging Face |
-| Backend hosting | Hugging Face Spaces | Public API |
+| Packaging | Docker | Runs the backend on Render |
+| Backend hosting | Render free web service (was Hugging Face Spaces, see note) | Public API |
 | Website hosting | GitHub Pages | Public demo site |
 
 Model names were checked against Google's model and pricing pages on
@@ -61,7 +61,7 @@ this project does not use them.
 ```mermaid
 flowchart LR
     U[Visitor] --> W[Website + chat widget<br/>GitHub Pages]
-    W -- "POST /chat" --> B[FastAPI backend<br/>Hugging Face Spaces]
+    W -- "POST /chat" --> B[FastAPI backend<br/>Render]
     B -- "embed question" --> G[(Gemini API)]
     B -- "find similar chunks" --> C[(ChromaDB)]
     B -- "question + chunks" --> G
@@ -120,7 +120,7 @@ None yet. No code has been run.
 |---|---|---|---|
 | 1 | Gemini model names change. `gemini-2.5-flash` is now limited to existing users. | Code with an old name fails. | Use the verified names and keep them in `.env`. |
 | 2 | GitHub Pages can only publish the repo root or a `/docs` folder, not `/web`. | The website would not publish. | Deploy `web/` with a GitHub Actions workflow. |
-| 3 | Hugging Face free storage is erased on restart. | The vector database disappears. | Rebuild it from `data/` each time the app starts. |
+| 3 | Free hosting storage is erased on restart and sleep. | The vector database disappears. | Build it into the Docker image; `start.sh` rebuilds it if missing. |
 | 4 | The n8n webhook must be reachable from the internet. n8n Cloud is a trial. | Leads would not arrive from the live demo. | Decide on Day 2: Cloud trial or free self-hosting. The backend must work even when the webhook is down. |
 | 5 | Free-tier request limits. | Visitors could use up the daily quota. | Rate limiting per visitor; tests use a fake Gemini so they don't spend quota. |
 | 6 | Leads are personal data. | Privacy risk. | Ask for consent, keep the Sheet private, never store leads in the repo. |
@@ -143,3 +143,6 @@ Planning is complete. No code has been written or tested yet.
 
 Task 1.1: check Python, open the project in VS Code and create a virtual
 environment. See `PROJECT_TRACKER.md`.
+
+> **Note, 18 November 2026:** Hugging Face Docker Spaces became paid (July
+> 2026), so the backend moved to Render's free tier. See `docs/16_render.md`.

@@ -4,6 +4,8 @@
 backend/.env
 **/.env
 backend/leads
+# Render copies Secret Files into the build folder; never into the image
+GEMINI_API_KEY
 
 # Built again inside the image; a laptop copy would be the wrong one
 backend/chroma_db

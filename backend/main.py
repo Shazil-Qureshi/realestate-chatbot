@@ -70,7 +70,7 @@ N8N_WEBHOOK_URL = os.getenv("N8N_WEBHOOK_URL", "").strip()
 
 # Demo mode for leads (Task 3.3). The public live site has no n8n it can
 # reach, so there the form checks the details and then keeps nothing.
-# Set LEADS_DEMO_MODE=true on Hugging Face; leave it unset on the laptop.
+# Set LEADS_DEMO_MODE=true on Render; leave it unset on the laptop.
 LEADS_DEMO_MODE = os.getenv("LEADS_DEMO_MODE", "").strip().lower() in ("1", "true", "yes")
 
 if LEADS_DEMO_MODE:

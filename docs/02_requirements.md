@@ -77,7 +77,7 @@ property, price or person.
 | NFR-03 | No API key, token or password shall appear in the GitHub repository. | `.env` is listed in `.gitignore`; repository searched before publishing. |
 | NFR-04 | The backend shall limit how many questions one visitor can ask per hour. | A limit is enforced and tested by exceeding it. |
 | NFR-05 | The chatbot shall keep answering questions even when the n8n webhook is unreachable. | Tested with a deliberately wrong webhook address. |
-| NFR-06 | The vector database shall be rebuilt automatically when the server starts. | Verified after restarting the Hugging Face Space. |
+| NFR-06 | The vector database shall be rebuilt automatically when the server starts. | Verified after the hosted server (Render, see amendment) sleeps and wakes. |
 | NFR-07 | The website shall state clearly that the company and its data are fictional. | Visible on the page and in the chat. |
 | NFR-08 | The chat widget shall be usable on a phone screen. | Checked at 375 px width. |
 | NFR-09 | Lead data shall not be committed to the repository or shown to other visitors. | Repository and responses inspected. |
@@ -113,7 +113,7 @@ recorded in a test report with real output:
 | AC-7 | Pointing the webhook at a wrong address still allows normal chat. | NFR-05 |
 | AC-8 | Searching the public repository finds no API key. | NFR-03 |
 | AC-9 | Exceeding the rate limit returns a clear "too many requests" message. | NFR-04 |
-| AC-10 | Restarting the Hugging Face Space leaves the chatbot working with no manual step. | NFR-06 |
+| AC-10 | Restarting the hosted backend (Render) leaves the chatbot working with no manual step. | NFR-06 |
 
 ## 5. Files created or modified
 
@@ -174,3 +174,10 @@ Completed and reviewed on 13 November 2026.
 Task 1.3: write the fictional Bella Real Estate documents into `data/`. These
 become the chatbot's knowledge, so their quality sets a ceiling on how good the
 answers can be.
+
+## Amendment · 18 November 2026: backend host
+
+Hugging Face made Docker Spaces paid in July 2026, which conflicts with
+NFR-02. The backend is hosted on **Render's free web service** instead. NFR-06
+and AC-10 now refer to that host. The intent is unchanged. Details:
+`docs/16_render.md`.

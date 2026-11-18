@@ -178,6 +178,6 @@ row in Google Sheets.
   planned for Stage 3 (NFR-04, AC-9). The hidden field stops simple bots only.
 - **Leads in `pending.jsonl` are not re-sent automatically** once n8n is up.
   They are kept, not lost, but forwarding them is a manual step for now.
-- **On Hugging Face Spaces the disk is temporary.** A lead saved to the
-  pending file there is lost when the Space restarts. That makes n8n the real
-  destination in production, and Stage 3 must keep it reliable.
+- **On the free host the disk is temporary.** A lead saved to the pending
+  file there would be lost on restart. Stage 3 resolved this with demo mode
+  on the live site (`docs/16_render.md`).

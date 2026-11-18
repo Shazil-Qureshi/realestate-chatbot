@@ -12,13 +12,18 @@
 (function () {
   "use strict";
 
-  // Where the backend lives. Stage 3 replaces this with the Hugging Face
-  // address. A page can override it by setting window.BELLA_API_URL before
-  // loading this file.
+  // Where the backend lives. The live site sets window.BELLA_API_URL to the
+  // Render address (Stage 3) before loading this file; locally it is the
+  // laptop.
   var API_URL = window.BELLA_API_URL || "http://127.0.0.1:8000";
 
   // Must match MAX_QUESTION_CHARS in backend/main.py.
   var MAX_CHARS = 1000;
+
+  // Waking a sleeping server (see send()). A page or a test can shorten these.
+  var SLOW_AFTER_MS = window.BELLA_SLOW_AFTER_MS || 6000;
+  var RETRY_EVERY_MS = window.BELLA_RETRY_EVERY_MS || 5000;
+  var WAKE_LIMIT_MS = window.BELLA_WAKE_LIMIT_MS || 90000;
 
   var SUGGESTIONS = [
     "What are your fees for buying a house?",
@@ -298,8 +303,8 @@
   // Errors say what happened and what to do, in the widget's own voice.
   function describeError(status, detail) {
     if (status === 0) {
-      return "The assistant can't be reached. If you are running this " +
-        "locally, start the backend with: python backend\\main.py";
+      return "The assistant can't be reached right now. Try again in a " +
+        "minute. (Running locally? Start the backend with: python backend\\main.py)";
     }
     if (status === 400) {
       return detail || "That message can't be sent. Check it isn't empty " +
@@ -329,16 +334,46 @@
     var thinking = addMessage("bot", "Looking that up…");
     thinking.classList.add("chat-msg-pending");
 
-    fetch(API_URL + "/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    })
-      .then(function (response) {
-        return response.json().catch(function () { return {}; })
-          .then(function (body) { return { status: response.status, body: body }; });
+    // The free hosting (Render) puts the server to sleep after 15 quiet
+    // minutes, and waking it takes about a minute. If the answer is slow,
+    // say why; if the server isn't awake yet, try again for up to WAKE_LIMIT.
+    var started = Date.now();
+    var slowNote = setTimeout(function () {
+      thinking.textContent = "Waking up the assistant. The free server sleeps " +
+        "when no one has visited for a while, so this first answer can take " +
+        "up to a minute.";
+    }, SLOW_AFTER_MS);
+
+    function attempt() {
+      return fetch(API_URL + "/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
       })
+        .then(function (response) {
+          return response.json().catch(function () { return {}; })
+            .then(function (body) { return { status: response.status, body: body }; });
+        }, function () { return { status: 0, body: {} }; })
+        .then(function (result) {
+          // Not awake yet = no answer at all, or a 502/503/504 from the host
+          // that isn't our JSON (our own errors always carry "detail"). Only
+          // that is retried, never our own errors, so a real failure never
+          // costs extra Gemini calls.
+          var gatewayPage = [502, 503, 504].indexOf(result.status) !== -1 &&
+            !("answer" in result.body) && !("detail" in result.body);
+          var notAwake = result.status === 0 || gatewayPage;
+          if (notAwake && Date.now() - started < WAKE_LIMIT_MS) {
+            return new Promise(function (resolve) {
+              setTimeout(resolve, RETRY_EVERY_MS);
+            }).then(attempt);
+          }
+          return result;
+        });
+    }
+
+    attempt()
       .then(function (result) {
+        clearTimeout(slowNote);
         thinking.remove();
         if (result.status === 200 && result.body.answer) {
           var bubble = addMessage("bot", result.body.answer);
@@ -351,8 +386,9 @@
         }
       })
       .catch(function () {
-        // fetch rejects with no status when the server is down, or when the
-        // browser blocks the response because of CORS.
+        // Only reached if something unexpected throws: attempt() already
+        // turns a failed request into status 0.
+        clearTimeout(slowNote);
         thinking.remove();
         addMessage("error", describeError(0));
       })

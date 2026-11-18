@@ -12,4 +12,5 @@ python ingest.py --delay 1 || echo "[start] ingest.py did not finish - starting 
 
 # 0.0.0.0 means "accept connections from outside the container", not just
 # from inside it. 127.0.0.1 would make the server unreachable.
+# $PORT is set by the host (Render); 7860 is only the fallback.
 exec uvicorn main:app --host 0.0.0.0 --port "${PORT:-7860}"
