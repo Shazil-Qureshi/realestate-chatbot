@@ -40,7 +40,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 
 | ID | Task | Status |
 |---|---|---|
-| 3.1 | Git and GitHub repository | Not Started |
+| 3.1 | Git and GitHub repository — <https://github.com/Shazil-Qureshi/realestate-chatbot> (public), `docs/14_github.md`; private commit email; GIT-01..05 and AC-8 Pass (18 Nov, commit `34e6139`) | Completed |
 | 3.2 | Dockerfile | Not Started |
 | 3.3 | Backend on Hugging Face Spaces | Not Started |
 | 3.4 | Website on GitHub Pages (Actions workflow) | Not Started |
@@ -62,7 +62,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 | ID | Item | Raised in | Status |
 |---|---|---|---|
 | DEP-05 | `requirements.lock.txt` encoding | 1.4 | **Closed 16 Nov** — regenerated as ASCII and verified |
-| API-05 | Confirm `.env` never reaches Git | 1.5 | Open — checked in Stage 3 when the repository is created |
+| API-05 | Confirm `.env` never reaches Git | 1.5 | **Closed 18 Nov** — fresh clone of the public repository has no `.env` or key (`docs/14_github.md`) |
 | ING-06 | Confirm re-running ingestion does not duplicate chunks | 1.6 | Open — one extra run of `python backend/ingest.py` |
 | RET-01 | Vector search ignores hard constraints such as city (Rawalpindi ranked above Islamabad) | 1.6 | **Mitigated** — CHAT-03 passed on 16 Nov with `TOP_K = 5` plus rule 3. One passing question is not proof for all; re-check if new listings are added. |
 | RET-03 | Retrieval recall: BRE-S-302 missed for a 3-bedroom question | 1.8 | **Mitigated** — Rawalpindi file split by sale/rent, `TOP_K` 8, completeness rule 8. CHAT-11 passes, but BRE-S-302 sits at rank 8 of 8. Structural fix (metadata filtering) listed for Stage 4. |
@@ -73,6 +73,6 @@ Status values: Not Started · In Progress · Completed · Blocked
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 17 of 28 tasks completed.** Stages 1 and 2 complete (AC-1 open as RET-04). Stage 3 next.
+**Progress: 18 of 28 tasks completed.** Stages 1 and 2 complete (AC-1 open as RET-04). Stage 3: 3.1 done, 3.2 next.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).

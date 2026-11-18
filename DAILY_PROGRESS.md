@@ -5,6 +5,44 @@ after the test has actually been run.
 
 ---
 
+## Session 9 · 18 November 2026
+
+**Stage:** 3 – GitHub and deployment
+
+### Completed
+- Task 3.1: the project is on GitHub at
+  <https://github.com/Shazil-Qureshi/realestate-chatbot> (public), first commit
+  `34e6139`, 54 files.
+
+### What I learned
+- Every commit carries an email address, and on a public repository anyone can
+  read it. GitHub's private noreply address avoids that.
+- Check what will be committed **before** committing. Removing a secret
+  afterwards doesn't remove it from the history.
+- Windows remembers Git logins. A saved work account can be used for a
+  personal repository without asking. Putting the username in the remote
+  address picks the right account.
+- A "file written" message isn't proof. Four files on the laptop turned out
+  to be out of date, so I checked by reading the size back.
+
+### Tests executed
+| Tests | Result |
+|---|---|
+| GIT-01..05 | Pass |
+| AC-8 / API-05 (fresh public clone: no key, no lead data, no private email) | Pass |
+| CHAT-01 re-run after `test_chat.py` was updated | Pass |
+
+### Outstanding issues
+- RET-04 (AC-1), LEAD-R1, N8N-S1, ING-06, RATE-01, robot animation licence.
+
+### Next task
+- 3.2: Dockerfile for the backend.
+
+### Progress
+18 of 28 tasks completed.
+
+---
+
 ## Session 8 · 17–18 November 2026
 
 **Stage:** 2 – Website and lead capture
