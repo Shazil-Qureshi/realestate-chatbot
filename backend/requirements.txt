@@ -1,0 +1,38 @@
+# Python package list for the AI Real Estate Chatbot backend.
+#
+# Install with the virtual environment active:
+#     pip install -r backend/requirements.txt
+#
+# Versions are deliberately NOT pinned to exact numbers yet. We install first,
+# confirm everything works on Python 3.14, then freeze the exact versions into
+# requirements.lock.txt for deployment. Pinning numbers we have not tested
+# would be guessing.
+
+# --- Web API ---------------------------------------------------------------
+# fastapi: turns Python functions into web addresses the website can call.
+fastapi
+
+# uvicorn: the server that actually runs FastAPI and listens for requests.
+# The [standard] extra adds faster networking and auto-reload during development.
+uvicorn[standard]
+
+# --- AI --------------------------------------------------------------------
+# google-genai: Google's Gemini SDK. Used for both writing answers and
+# creating embeddings. Version 3.3.0+ supports Python 3.14.
+google-genai>=3.3.0
+
+# --- Vector database -------------------------------------------------------
+# chromadb: stores the document embeddings and finds the closest matches
+# to a question. Version 1.5.9+ is required.
+chromadb>=1.5.9
+
+# --- Utilities -------------------------------------------------------------
+# python-dotenv: reads backend/.env so secrets stay out of the code.
+python-dotenv
+
+# httpx: sends the lead to the n8n webhook. Works with async FastAPI.
+httpx
+
+# --- Testing ---------------------------------------------------------------
+# pytest: runs the test files in tests/.
+pytest

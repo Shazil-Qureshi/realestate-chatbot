@@ -1,0 +1,216 @@
+{
+  "name": "Bella Real Estate — Lead to Sheet and Email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bella-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "55a668cf-ec0e-42f4-abb8-00fc2c9508a1",
+      "name": "Receive lead",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "aaed4bac-64b9-450e-9f1a-2f71141d2a5b"
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "lead_id": "={{ $json.body.lead_id }}",
+            "received_at": "={{ $json.body.received_at }}",
+            "name": "={{ $json.body.name }}",
+            "phone": "={{ $json.body.phone }}",
+            "email": "={{ $json.body.email }}",
+            "property_ref": "={{ $json.body.property_ref }}",
+            "message": "={{ $json.body.message }}",
+            "source": "={{ $json.body.source }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "lead_id",
+              "displayName": "lead_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "property_ref",
+              "displayName": "property_ref",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "id": "acb5f704-a486-4a82-9c5c-c8bdff73c871",
+      "name": "Add row to Leads sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"ok\": true,\n  \"lead_id\": \"{{ $('Receive lead').item.json.body.lead_id }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "2c258c17-9759-476a-9c78-749ed8c4e8ad",
+      "name": "Tell backend it is saved",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "authentication": "oAuth2",
+        "sendTo": "REPLACE_WITH_YOUR_EMAIL@example.com",
+        "subject": "=New lead: {{ $('Receive lead').item.json.body.name }}{{ $('Receive lead').item.json.body.property_ref ? ' — ' + $('Receive lead').item.json.body.property_ref : '' }}",
+        "emailType": "text",
+        "message": "=A visitor asked to be contacted through the Bella Real Estate chat.\n\nName:      {{ $('Receive lead').item.json.body.name }}\nPhone:     {{ $('Receive lead').item.json.body.phone }}\nEmail:     {{ $('Receive lead').item.json.body.email || '(not given)' }}\nProperty:  {{ $('Receive lead').item.json.body.property_ref || '(not given)' }}\nNote:      {{ $('Receive lead').item.json.body.message || '(none)' }}\n\nReceived:  {{ $('Receive lead').item.json.body.received_at }} (UTC)\nLead ID:   {{ $('Receive lead').item.json.body.lead_id }}\n\nThis lead is also in the Leads sheet.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a1c64519-202d-4d27-baec-260cc134ef47",
+      "name": "Email the agent",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Receive lead": {
+      "main": [
+        [
+          {
+            "node": "Add row to Leads sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add row to Leads sheet": {
+      "main": [
+        [
+          {
+            "node": "Tell backend it is saved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tell backend it is saved": {
+      "main": [
+        [
+          {
+            "node": "Email the agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

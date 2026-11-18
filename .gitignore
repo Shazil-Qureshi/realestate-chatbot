@@ -1,0 +1,28 @@
+# Secrets: never commit these
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Vector database (rebuilt by ingest.py, not stored in Git)
+backend/chroma_db/
+chroma_db/
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Test and tool caches
+.pytest_cache/
+
+# Leads held locally when n8n is unavailable. Personal data: never commit (NFR-09).
+backend/leads/
+
+# Saved console output from test runs (local only)
+test_output*.txt

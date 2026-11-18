@@ -1,0 +1,246 @@
+/* Bella Real Estate — landing page styles (Task 2.1)
+   One stylesheet, no frameworks, no external fonts. Everything the page
+   needs ships in this folder, which keeps GitHub Pages deployment trivial
+   and the page working offline. */
+
+:root {
+  --green-900: #15372c;   /* deep forest — headers, footer */
+  --green-700: #1f5c47;   /* primary brand */
+  --green-100: #e7f2ed;   /* soft tint for alternate sections */
+  --gold-500:  #c9a227;   /* accent on dark backgrounds only (hero) */
+  --gold-700:  #8d721b;   /* same hue, darkened for text on light backgrounds:
+                            4.61:1 on white. #c9a227 was 2.42:1. */
+  --ink:       #22302b;   /* body text */
+  --ink-soft:  #5a6b64;   /* secondary text */
+  --paper:     #ffffff;
+  --line:      #dbe5e0;
+  --radius:    10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.6;
+}
+
+h1, h2, h3, .brand-name, .site-nav, .tag, .ref, .demo-banner, .specs,
+.fee-amount, .price {
+  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+}
+
+.container { max-width: 1060px; margin: 0 auto; padding: 0 20px; }
+
+/* --- demo banner ------------------------------------------------------ */
+.demo-banner {
+  background: #fff7e0;
+  color: #6b5200;
+  border-bottom: 1px solid #ead9a0;
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+}
+
+/* --- header ----------------------------------------------------------- */
+.site-header {
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  background: var(--green-700);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.2rem;
+  border-radius: 8px;
+}
+.brand-name { font-weight: 700; font-size: 1.15rem; color: var(--green-900); }
+.site-nav { display: flex; gap: 22px; flex-wrap: wrap; }
+.site-nav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.site-nav a:hover { color: var(--green-700); text-decoration: underline; }
+
+/* --- hero ------------------------------------------------------------- */
+.hero {
+  background:
+    linear-gradient(140deg, var(--green-900) 0%, var(--green-700) 70%, #2a7257 100%);
+  color: #fff;
+  padding: 72px 0 56px;
+}
+.hero h1 { font-size: clamp(1.8rem, 4.5vw, 2.9rem); line-height: 1.15; }
+.hero-sub {
+  margin-top: 16px;
+  max-width: 560px;
+  color: #d9e8e1;
+  font-size: 1.05rem;
+}
+.hero-facts { display: flex; gap: 34px; margin-top: 36px; flex-wrap: wrap; }
+.fact strong { display: block; font-size: 1.5rem; color: var(--gold-500); }
+.fact span { font-size: 0.85rem; color: #bcd4ca; }
+
+/* --- sections --------------------------------------------------------- */
+.section { padding: 56px 0; }
+.section-alt { background: var(--green-100); }
+.section h2 { font-size: 1.7rem; color: var(--green-900); }
+.section-sub { color: var(--ink-soft); margin-top: 6px; max-width: 640px; }
+.grid-note { color: var(--ink-soft); font-size: 0.92rem; margin-top: 22px; }
+
+/* --- property cards --------------------------------------------------- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 22px;
+  margin-top: 28px;
+}
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.card-media {
+  height: 110px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+/* No photos on purpose: the properties are fictional, so the page shows a
+   styled panel instead of a stock photo pretending to be the real house. */
+.card-media.sale { background: linear-gradient(135deg, #1f5c47, #2a7257); }
+.card-media.rent { background: linear-gradient(135deg, #274e63, #3c7390); }
+.ref {
+  background: rgba(255,255,255,0.92);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 3px 8px;
+  border-radius: 5px;
+}
+.tag {
+  color: #fff;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.card-body { padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.card-body h3 { font-size: 1.02rem; color: var(--green-900); line-height: 1.35; }
+.price { color: var(--gold-700); font-weight: 700; font-size: 1.15rem; }
+.price small { color: var(--ink-soft); font-weight: 400; font-size: 0.8rem; }
+.specs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.specs li {
+  background: var(--green-100);
+  color: var(--green-900);
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.features { color: var(--ink-soft); font-size: 0.9rem; }
+
+/* --- fees ------------------------------------------------------------- */
+.fee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 22px;
+  margin-top: 28px;
+}
+.fee {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.fee h3 { color: var(--green-900); font-size: 1rem; }
+.fee-amount { color: var(--gold-700); font-size: 1.5rem; font-weight: 700; margin: 6px 0; }
+.fee p:last-child { color: var(--ink-soft); font-size: 0.92rem; }
+
+/* --- areas & offices --------------------------------------------------- */
+.areas-grid, .office-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 26px;
+  margin-top: 26px;
+}
+.areas-grid h3, .office h3 { color: var(--green-700); margin-bottom: 6px; }
+.areas-grid p, .office p { color: var(--ink-soft); }
+.office p + p { margin-top: 8px; }
+.hours { margin-top: 26px; color: var(--ink-soft); font-size: 0.95rem; }
+
+/* --- footer ------------------------------------------------------------ */
+.site-footer {
+  background: var(--green-900);
+  color: #a9c3b8;
+  padding: 34px 0;
+  font-size: 0.88rem;
+}
+.site-footer p + p { margin-top: 12px; color: #7fa294; }
+
+/* --- small screens ----------------------------------------------------- */
+@media (max-width: 560px) {
+  .hero { padding: 48px 0 40px; }
+  .hero-facts { gap: 20px; }
+  .section { padding: 40px 0; }
+}
+
+/* --- Accessibility additions, Task 2.1 polish (16 Nov 2026) --- */
+
+/* Keyboard users must be able to see where they are. Mouse clicks do not
+   trigger :focus-visible, so this ring never appears for pointer users. */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--gold-500);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Hidden until focused with Tab, then appears top-left. */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--green-900);
+  color: #fff;
+  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.skip-link:focus { top: 12px; }
+
+/* The page has no animation today. This keeps it that way for anyone who has
+   asked their system for reduced motion, including the chat widget in 2.2. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
