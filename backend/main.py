@@ -20,6 +20,8 @@ Stop it with Ctrl+C.
 
 import os
 import sys
+import threading
+import time
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -162,26 +164,65 @@ if not EMBED_MODEL:
 if not DB_DIR.exists():
     fail(f"No database at {DB_DIR}. Run 'python backend\\ingest.py' first.")
 
-import chromadb  # noqa: E402
-from google import genai  # noqa: E402
-from google.genai import types  # noqa: E402
-
 from leads import LeadIn, handle_lead  # noqa: E402
 
-gemini = genai.Client(api_key=API_KEY)
+# Loading ChromaDB and the Gemini library is the slow part of starting up.
+# On the laptop it takes seconds. On Render's free server (a tenth of a CPU)
+# it can take minutes, and Render gives up if the web port stays closed that
+# long. So when Render starts the server, the port opens first and this
+# loading happens in the background: /health says "starting" until it is
+# done, and /chat waits for it. On the laptop (python backend\\main.py) it
+# still loads first, so the startup banner can show the chunk count.
 
-db = chromadb.PersistentClient(path=str(DB_DIR))
-try:
-    collection = db.get_collection(name=COLLECTION_NAME)
-except Exception:
-    fail(
-        f"Collection '{COLLECTION_NAME}' not found. "
-        "Run 'python backend\\ingest.py' first."
-    )
+gemini = None
+types = None
+collection = None
+CHUNK_COUNT = None
+LOAD_ERROR = None
+READY = threading.Event()
 
-CHUNK_COUNT = collection.count()
-if CHUNK_COUNT == 0:
-    fail("The collection is empty. Run 'python backend\\ingest.py' first.")
+
+def load_knowledge():
+    """Open the Gemini client and the vector database. Sets READY when done."""
+    global gemini, types, collection, CHUNK_COUNT, LOAD_ERROR
+    started = time.monotonic()
+    try:
+        print("[startup] loading ChromaDB and Gemini libraries...", flush=True)
+        import chromadb
+        from google import genai
+        from google.genai import types as genai_types
+
+        types = genai_types
+        gemini = genai.Client(api_key=API_KEY)
+        db = chromadb.PersistentClient(path=str(DB_DIR))
+        try:
+            collection = db.get_collection(name=COLLECTION_NAME)
+        except Exception:
+            raise RuntimeError(
+                f"Collection '{COLLECTION_NAME}' not found. "
+                "Run 'python backend\\ingest.py' first."
+            )
+        CHUNK_COUNT = collection.count()
+        if CHUNK_COUNT == 0:
+            raise RuntimeError("The collection is empty. Run 'python backend\\ingest.py' first.")
+        print(
+            f"[startup] ready: {CHUNK_COUNT} chunks, "
+            f"loaded in {time.monotonic() - started:.1f} s",
+            flush=True,
+        )
+    except Exception as error:  # noqa: BLE001 - reported through /health
+        LOAD_ERROR = str(error)
+        print(f"[startup] FAILED after {time.monotonic() - started:.1f} s: {error}", flush=True)
+    finally:
+        READY.set()
+
+
+# How long /chat waits for a server that is still starting.
+STARTUP_WAIT_SECONDS = 120
+
+if __name__ != "__main__":
+    # Started by uvicorn (Render, tests): open the port now, load meanwhile.
+    threading.Thread(target=load_knowledge, daemon=True).start()
 
 # ---------------------------------------------------------------------------
 # The web application
@@ -222,8 +263,10 @@ class ChatResponse(BaseModel):
 @app.get("/health")
 def health():
     """Confirm the server is running and the knowledge base is loaded."""
+    if LOAD_ERROR:
+        raise HTTPException(status_code=503, detail=f"Startup failed: {LOAD_ERROR}")
     return {
-        "status": "ok",
+        "status": "ok" if READY.is_set() else "starting",
         "prompt_version": PROMPT_VERSION,
         "chunks": CHUNK_COUNT,
         "chat_model": CHAT_MODEL,
@@ -251,6 +294,15 @@ def chat(request: ChatRequest):
             status_code=400,
             detail=f"The message is too long. Limit is {MAX_QUESTION_CHARS} characters.",
         )
+
+    # A server that has only just started may still be loading.
+    if not READY.wait(timeout=STARTUP_WAIT_SECONDS):
+        raise HTTPException(
+            status_code=503,
+            detail="The assistant is still starting. Try again in a minute.",
+        )
+    if LOAD_ERROR:
+        raise HTTPException(status_code=503, detail="The assistant failed to start.")
 
     # --- 1. Turn the question into an embedding ---------------------------
     try:
@@ -349,6 +401,10 @@ def lead(request: LeadIn):
 
 if __name__ == "__main__":
     import uvicorn
+
+    load_knowledge()
+    if LOAD_ERROR:
+        fail(LOAD_ERROR)
 
     print()
     print("=" * 68)

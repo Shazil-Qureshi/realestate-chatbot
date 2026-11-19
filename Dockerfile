@@ -12,9 +12,12 @@ FROM python:3.14-slim
 # below belongs to it.
 RUN useradd -m -u 1000 user
 USER user
+# ANONYMIZED_TELEMETRY=False stops ChromaDB sending anonymous usage
+# reports: one less network call and background job on a tiny server.
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    ANONYMIZED_TELEMETRY=False
 WORKDIR $HOME/app
 
 # 1. Packages. Copied on their own first so Docker can reuse this slow step

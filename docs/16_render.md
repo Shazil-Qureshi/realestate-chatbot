@@ -110,6 +110,65 @@ empty, so nothing changes there. `/health` reports `"leads_demo": true/false`.
 
 Widget tests used a stand-in server running the real `leads.py`.
 
+## Security incident · 18 November 2026, 16:22 PKT
+
+**What happened.** While the Render Secret File was being filled in, the
+wrong value was pasted: the **Google OAuth client secret** used by n8n
+(`GOCSPX-…`, ending `vydS`), with `GEMINI_API_KEY=` in front of it. A
+screenshot of that form was then shared in the build conversation, so the
+secret must be treated as exposed.
+
+**What it could allow.** With the client ID, someone could pose as this
+OAuth app. It doesn't give access to the Google account by itself, because a
+user still has to approve the sign-in. It was replaced anyway.
+
+**Response.**
+1. Deploy stopped before it ran. The wrong Secret File was deleted, and the
+   correct Gemini key was entered (not shown to anyone).
+2. The Google client secret is being replaced: new secret in Google Cloud →
+   n8n Sheets and Gmail credentials updated → old secrets (`…vydS`, `…DwRc`)
+   deleted → one test lead to confirm. *(Status recorded below once done.)*
+3. The secret itself is not written in any project file or doc.
+
+**Lessons.**
+- Two different secrets were open at the same time and looked alike in
+  the clipboard. Check the start of a key before pasting: Gemini keys
+  start `AIza`, Google client secrets start `GOCSPX-`.
+- Screenshot settings pages **before** pasting secrets, not after.
+- A secret file holds only the value. `NAME=value` is `.env` format, and it's
+  wrong here.
+
+| Step | Status |
+|---|---|
+| Wrong Secret File deleted, correct key entered | Done (owner, 16:26) |
+| New Google client secret, n8n credentials updated | Pending |
+| Old secrets deleted in Google Cloud | Pending |
+| Test lead reaches sheet and email | Pending |
+
+## First deploys (18 November)
+
+| Deploy | Result | Cause | Fix |
+|---|---|---|---|
+| 1, 16:31 | Build failed: `secret GEMINI_API_KEY: not found` | The Secret File was missing: deleted during the incident above and not re-added | Secret File added |
+| 2, 16:36 | Build **succeeded** (packages and the 56-chunk index, ~15 min); start **timed out** after Render's 15-minute health-check wait | `start.sh` ran `ingest.py` before starting the web server, and that sat on "Opening the vector database". The last log line was `[3/4] Opening the vector database`. No out-of-memory events. Render's free plan shows no CPU or memory graphs, so the exact cause can't be proven: either loading ChromaDB on 0.1 CPU is extremely slow, or it hangs. | See below |
+
+Also seen: the Secret File was first saved as `GEMINI_API_KEY.txt`. Render
+names a secret after its file, with `.` turned into `_`, so the build was
+looking for a different name.
+
+**Fixes after deploy 2:**
+1. `start.sh` no longer runs `ingest.py` when the index is already in the
+   image. It checks for `chroma_db/chroma.sqlite3`, which costs nothing.
+2. `main.py` opens the web port **first** and loads ChromaDB and the Gemini
+   library **in the background**. `/health` answers `"status": "starting"`
+   until loading is done, which satisfies Render's check, and then `"ok"`.
+   `/chat` waits up to 120 s for loading. The log prints
+   `[startup] ready: 56 chunks, loaded in N s`, which finally measures the
+   slowness. On the laptop (`python backend\main.py`) it still loads first,
+   so nothing changes there.
+3. `ANONYMIZED_TELEMETRY=False` in the Dockerfile turns off ChromaDB's
+   anonymous usage reporting.
+
 ## Setting up Render
 
 *(Filled in as the steps are done.)*

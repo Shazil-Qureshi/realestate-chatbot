@@ -3,12 +3,18 @@
 
 cd "$(dirname "$0")"
 
-# Safety net for NFR-06. The index was built into the image, so this
-# normally finds every chunk already stored and adds nothing. It only does
-# real work if the index is missing. If it fails (for example, the Gemini
-# quota is used up), the server still starts and /health shows the chunk
-# count.
-python ingest.py --delay 1 || echo "[start] ingest.py did not finish - starting the server anyway"
+# Safety net for NFR-06. The index is built into the image, so normally
+# this is skipped without loading anything: on a slow free server, even
+# opening the database takes a long time, and Render gives up if the web
+# port isn't open soon. Only if the index is missing is it rebuilt (that
+# makes Gemini calls). If the rebuild fails, the server starts anyway and
+# /health reports the problem.
+if [ -f chroma_db/chroma.sqlite3 ]; then
+    echo "[start] search index found in the image - skipping ingest"
+else
+    echo "[start] no search index - building it now"
+    python ingest.py --delay 1 || echo "[start] ingest.py did not finish - starting the server anyway"
+fi
 
 # 0.0.0.0 means "accept connections from outside the container", not just
 # from inside it. 127.0.0.1 would make the server unreachable.
