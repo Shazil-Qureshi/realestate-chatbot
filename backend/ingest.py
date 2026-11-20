@@ -391,6 +391,14 @@ def main():
         if vector is None:
             failed.append(chunk["id"])
             print(f"      {index:>3}/{len(todo)}  FAILED  {chunk['id']}")
+            # If the first three all fail, the problem is the key, the model
+            # or the quota, not one chunk. Stop now instead of spending
+            # minutes failing the other 53.
+            if stored == 0 and len(failed) >= 3:
+                print()
+                bad("Gemini refused the first 3 chunks - stopping early")
+                bad(f"Gemini's error: {LAST_ERROR}")
+                sys.exit(1)
             continue
 
         collection.upsert(
@@ -419,10 +427,17 @@ def main():
     # "successfully" let a Docker build carry on with an empty index
     # (Render deploy d2adb64, 19 Nov 2026).
     if failed or total < len(all_chunks):
+        if LAST_ERROR:
+            bad(f"Gemini's last error: {LAST_ERROR}")
         bad(f"Index incomplete: {total} of {len(all_chunks)} chunks stored")
         sys.exit(1)
     if not verify(collection, api_key, embed_model):
         sys.exit(1)
+
+
+# The last error Gemini returned, printed at the end so it is easy to find
+# in a long build log.
+LAST_ERROR = None
 
 
 def embed_one(client, model, text, attempts=3):
@@ -438,6 +453,8 @@ def embed_one(client, model, text, attempts=3):
             result = client.models.embed_content(model=model, contents=text)
             return list(result.embeddings[0].values)
         except Exception as error:
+            global LAST_ERROR
+            LAST_ERROR = str(error)[:500]
             if attempt == attempts:
                 print(f"{INFO} giving up after {attempts} tries: {error}")
                 return None
