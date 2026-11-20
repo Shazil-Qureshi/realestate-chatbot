@@ -366,7 +366,8 @@ def main():
 
     if not todo:
         ok("Everything is already ingested. Nothing to do.")
-        verify(collection, api_key, embed_model)
+        if not verify(collection, api_key, embed_model):
+            sys.exit(1)
         return
 
     # -----------------------------------------------------------------------
@@ -406,14 +407,22 @@ def main():
         time.sleep(args.delay)
 
     print()
+    total = collection.count()
     if failed:
         bad(f"{len(failed)} chunks failed")
         for chunk_id in failed:
             info(chunk_id)
         info("Run the command again - stored chunks are skipped automatically.")
-    ok(f"{stored} chunks stored. Collection now holds {collection.count()}.")
+    ok(f"{stored} chunks stored. Collection now holds {total}.")
 
-    verify(collection, api_key, embed_model)
+    # A partial or empty index must stop here with an error. Exiting
+    # "successfully" let a Docker build carry on with an empty index
+    # (Render deploy d2adb64, 19 Nov 2026).
+    if failed or total < len(all_chunks):
+        bad(f"Index incomplete: {total} of {len(all_chunks)} chunks stored")
+        sys.exit(1)
+    if not verify(collection, api_key, embed_model):
+        sys.exit(1)
 
 
 def embed_one(client, model, text, attempts=3):
@@ -452,7 +461,7 @@ def verify(collection, api_key, embed_model):
 
     if query_vector is None:
         bad("Could not embed the test question")
-        return
+        return False
 
     results = collection.query(query_embeddings=[query_vector], n_results=3)
 
@@ -462,7 +471,7 @@ def verify(collection, api_key, embed_model):
 
     if not documents:
         bad("The search returned nothing")
-        return
+        return False
 
     for rank, (doc, meta, dist) in enumerate(
         zip(documents, metadatas, distances), start=1
@@ -474,6 +483,7 @@ def verify(collection, api_key, embed_model):
     print("-" * 68)
     ok("Search works. Lower distance means a closer match.")
     print()
+    return True
 
 
 if __name__ == "__main__":

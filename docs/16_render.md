@@ -152,6 +152,8 @@ user still has to approve the sign-in. It was replaced anyway.
 | 1, 16:31 | Build failed: `secret GEMINI_API_KEY: not found` | The Secret File was missing: deleted during the incident above and not re-added | Secret File added |
 | 2, 16:36 | Build **succeeded** (packages and the 56-chunk index, ~15 min); start **timed out** after Render's 15-minute health-check wait | `start.sh` ran `ingest.py` before starting the web server, and that sat on "Opening the vector database". The last log line was `[3/4] Opening the vector database`. No out-of-memory events. Render's free plan shows no CPU or memory graphs, so the exact cause can't be proven: either loading ChromaDB on 0.1 CPU is extremely slow, or it hangs. | See below |
 
+| 3, 19 Nov (`d2adb64`) | Build **succeeded**, deploy **Live**. Startup took **10.4 s** on Render, so the port-first change worked. Then `[startup] FAILED: The collection is empty` and `/health` 503 | The index built into the image was **empty**. `ingest.py` printed failures but still exited with code 0, so the build carried on. **Bug in `ingest.py`, fixed:** it now exits with an error if any chunk fails, if fewer than all chunks are stored, or if the verification search fails. Checked with stand-ins here: all embeddings refused → `Index incomplete: 0 of 56`, exit 1; all succeed → 56 stored, exit 0. The reason Gemini refused during the build: *(to be read from the build log)* | — |
+
 Also seen: the Secret File was first saved as `GEMINI_API_KEY.txt`. Render
 names a secret after its file, with `.` turned into `_`, so the build was
 looking for a different name.
