@@ -5,7 +5,7 @@
 | **Task** | 3.3 Backend hosting (first planned on Hugging Face Spaces) |
 | **Date** | 18 November 2026 |
 | **Requirements** | FR-15 (public live demo), NFR-02 (free tier), NFR-03, NFR-06, NFR-09, AC-10 |
-| **Status** | Live at <https://realestate-chatbot-4707.onrender.com> (24 Nov). Still to prove: waking after sleep (DOCK-07 / AC-10). |
+| **Status** | **Completed** 24 Nov. Live at <https://realestate-chatbot-4707.onrender.com>; wakes after sleep with no manual step (AC-10). |
 
 ## Terms
 
@@ -188,7 +188,7 @@ log search doesn't reach build output, so anything higher up is hard to find.
 | DOCK-04 | Image builds on Render | **Pass** (24 Nov) |
 | DOCK-05 | Index in the image: 56 chunks | **Pass**: `/health` reports `chunks: 56` |
 | DOCK-06 | `/health`: ok, 56 chunks, `leads_demo: true` | **Pass** (24 Nov, 10:13) |
-| DOCK-07 | After sleeping and waking: 56 chunks, no new embedding calls (AC-10) | Not yet run |
+| DOCK-07 | After sleeping and waking: 56 chunks, no new embedding calls (AC-10) | **Pass** (24 Nov): asleep after 15+ idle minutes (Render showed "SERVICE WAKING UP" at 10:58:51); within about 75 s `/health` was `ok`, 56 chunks; "What are your fees for buying a house?" answered in 2.2 s with the correct 1 percent commission. No manual step. |
 | DOCK-08 | No `.env`, key file or lead data in the image | Not yet run |
 | R-01 | `/chat` answers from the public address | **Pass**: "How do I book a viewing?" answered in 2.8 s with 8 sources; "Do you sell cars?" politely declined. Called from the `localhost:5500` origin, so CORS works too. |
 | R-03 | `/lead` in demo mode | **Pass**: valid lead → `received`, `demo: true`; phone `abc` → 422 with the clear message |
