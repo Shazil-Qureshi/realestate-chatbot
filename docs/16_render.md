@@ -5,7 +5,7 @@
 | **Task** | 3.3 Backend hosting (first planned on Hugging Face Spaces) |
 | **Date** | 18 November 2026 |
 | **Requirements** | FR-15 (public live demo), NFR-02 (free tier), NFR-03, NFR-06, NFR-09, AC-10 |
-| **Status** | In progress: demo mode and wake-up handling built and tested; Render service not created yet |
+| **Status** | Live at <https://realestate-chatbot-4707.onrender.com> (24 Nov). Still to prove: waking after sleep (DOCK-07 / AC-10). |
 
 ## Terms
 
@@ -152,7 +152,7 @@ user still has to approve the sign-in. It was replaced anyway.
 | 1, 16:31 | Build failed: `secret GEMINI_API_KEY: not found` | The Secret File was missing: deleted during the incident above and not re-added | Secret File added |
 | 2, 16:36 | Build **succeeded** (packages and the 56-chunk index, ~15 min); start **timed out** after Render's 15-minute health-check wait | `start.sh` ran `ingest.py` before starting the web server, and that sat on "Opening the vector database". The last log line was `[3/4] Opening the vector database`. No out-of-memory events. Render's free plan shows no CPU or memory graphs, so the exact cause can't be proven: either loading ChromaDB on 0.1 CPU is extremely slow, or it hangs. | See below |
 
-| 3, 19 Nov (`d2adb64`) | Build **succeeded**, deploy **Live**. Startup took **10.4 s** on Render, so the port-first change worked. Then `[startup] FAILED: The collection is empty` and `/health` 503 | The index built into the image was **empty**. `ingest.py` printed failures but still exited with code 0, so the build carried on. **Bug in `ingest.py`, fixed:** it now exits with an error if any chunk fails, if fewer than all chunks are stored, or if the verification search fails. Checked with stand-ins here: all embeddings refused → `Index incomplete: 0 of 56`, exit 1; all succeed → 56 stored, exit 0. The reason Gemini refused during the build: *(to be read from the build log)* | — |
+| 3, 19 Nov (`d2adb64`) | Build **succeeded**, deploy **Live**. Startup took **10.4 s** on Render, so the port-first change worked. Then `[startup] FAILED: The collection is empty` and `/health` 503 | The index built into the image was **empty**. `ingest.py` printed failures but still exited with code 0, so the build carried on. **Bug in `ingest.py`, fixed:** it now exits with an error if any chunk fails, if fewer than all chunks are stored, or if the verification search fails. Checked with stand-ins here: all embeddings refused → `Index incomplete: 0 of 56`, exit 1; all succeed → 56 stored, exit 0. The reason Gemini refused during the build is in the rows below. | — |
 
 Also seen: the Secret File was first saved as `GEMINI_API_KEY.txt`. Render
 names a secret after its file, with `.` turned into `_`, so the build was
@@ -171,6 +171,12 @@ looking for a different name.
 3. `ANONYMIZED_TELEMETRY=False` in the Dockerfile turns off ChromaDB's
    anonymous usage reporting.
 
+| 4, 20 Nov (`9d3af95`) | Build **failed in 1 min 20 s** (the early stop worked), with the reason printed at the bottom: `400 INVALID_ARGUMENT … API key not valid` | The key stored on Render was not a working key. `AQ.Ab…` is Google's newer, valid key format, so the format wasn't the problem; the stored value was. | The laptop's working key was pasted into both the variable and the Secret File |
+| 5, 24 Nov | **Live.** Index built into the image | — | — |
+
+Lesson: when a build step fails, make it print the cause as its **last** line. Render's
+log search doesn't reach build output, so anything higher up is hard to find.
+
 ## Setting up Render
 
 *(Filled in as the steps are done.)*
@@ -179,10 +185,11 @@ looking for a different name.
 
 | Test ID | Check | Result |
 |---|---|---|
-| DOCK-04 | Image builds on Render | Not yet run |
-| DOCK-05 | Build log: 56 chunks stored | Not yet run |
-| DOCK-06 | `/health`: ok, 56 chunks, `leads_demo: true` | Not yet run |
+| DOCK-04 | Image builds on Render | **Pass** (24 Nov) |
+| DOCK-05 | Index in the image: 56 chunks | **Pass**: `/health` reports `chunks: 56` |
+| DOCK-06 | `/health`: ok, 56 chunks, `leads_demo: true` | **Pass** (24 Nov, 10:13) |
 | DOCK-07 | After sleeping and waking: 56 chunks, no new embedding calls (AC-10) | Not yet run |
 | DOCK-08 | No `.env`, key file or lead data in the image | Not yet run |
-| R-01 | `/chat` answers from the public address | Not yet run |
+| R-01 | `/chat` answers from the public address | **Pass**: "How do I book a viewing?" answered in 2.8 s with 8 sources; "Do you sell cars?" politely declined. Called from the `localhost:5500` origin, so CORS works too. |
+| R-03 | `/lead` in demo mode | **Pass**: valid lead → `received`, `demo: true`; phone `abc` → 422 with the clear message |
 | R-02 | Memory stays within 512 MB | Not yet run |

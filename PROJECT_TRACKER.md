@@ -41,8 +41,8 @@ Status values: Not Started · In Progress · Completed · Blocked
 | ID | Task | Status |
 |---|---|---|
 | 3.1 | Git and GitHub repository — <https://github.com/Shazil-Qureshi/realestate-chatbot> (public), `docs/14_github.md`; private commit email; GIT-01..05 and AC-8 Pass (18 Nov, commit `34e6139`) | Completed |
-| 3.2 | Dockerfile — `Dockerfile`, `backend/start.sh`, `.dockerignore`, `.gitattributes`, `docs/15_docker.md`; index built into the image (NFR-06); DOCK-01..03 Pass; first real build in 3.3 (DOCK-04..08) | In Progress |
-| 3.3 | Backend hosting — **moved to Render free** (Hugging Face Docker Spaces became paid, July 2026); live leads in demo mode; wake-up handling in the widget; LEAD-24..27, WAKE-01..05 Pass here; Render setup next (`docs/16_render.md`) | In Progress |
+| 3.2 | Dockerfile — builds on Render with the 56-chunk index inside (DOCK-01..06 Pass, 24 Nov); `docs/15_docker.md` | Completed |
+| 3.3 | Backend hosting on Render free — **live** at https://realestate-chatbot-4707.onrender.com (24 Nov); /health, /chat, /lead (demo) Pass from outside; remaining: wake-after-sleep test (DOCK-07, AC-10) | In Progress |
 | 3.4 | Website on GitHub Pages (Actions workflow) | Not Started |
 | 3.5 | CORS and rate limiting | Not Started |
 | 3.6 | Live tests and security checklist | Not Started |
@@ -73,6 +73,6 @@ Status values: Not Started · In Progress · Completed · Blocked
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 18 of 28 tasks completed.** Stages 1 and 2 complete (AC-1 open as RET-04). Stage 3: 3.1 done, 3.2 next.
+**Progress: 19 of 28 tasks completed.** Stages 1 and 2 complete. Stage 3: 3.1 and 3.2 done; 3.3 live, one test left.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).
