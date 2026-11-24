@@ -141,9 +141,9 @@ user still has to approve the sign-in. It was replaced anyway.
 | Step | Status |
 |---|---|
 | Wrong Secret File deleted, correct key entered | Done (owner, 16:26) |
-| New Google client secret, n8n credentials updated | Pending |
-| Old secrets deleted in Google Cloud | Pending |
-| Test lead reaches sheet and email | Pending |
+| New Google client secret, n8n credentials updated | Done 24 Nov. The first attempts failed with `Client authentication failed`: the new secret hadn't reached n8n. Fixed by Disconnect → paste → Save → Sign in again, for both credentials. |
+| Old secrets deleted in Google Cloud | Done 24 Nov (owner) |
+| Test lead reaches sheet and email | **Pass** 24 Nov, 11:40: lead `774f1aa51e32` accepted by n8n (`pending.jsonl` unchanged). The 5 test leads sent while it was broken are safe in `pending.jsonl` (see LEAD-R1). |
 
 ## First deploys (18 November)
 
