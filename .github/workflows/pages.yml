@@ -1,9 +1,3 @@
-# Publishes the web/ folder to GitHub Pages when main is pushed (Task 3.4).
-#
-# Versions match GitHub's own starter workflow for Pages. upload-pages-artifact
-# and deploy-pages have to agree on how the artifact is stored. A newer tag
-# existing is not the same as it being compatible: upload-pages-artifact@v5
-# exists, but deploy-pages@v5 could not read what it produced.
 name: Publish website to GitHub Pages
 
 on:
@@ -14,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
@@ -22,16 +17,21 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v5
