@@ -5,7 +5,7 @@
 | **Task** | 3.5 CORS and rate limiting |
 | **Date** | 25 November 2026 |
 | **Requirements** | NFR-04, AC-9 |
-| **Status** | Code complete, 22 unit tests pass and the widget was checked in a browser. **Not yet verified against the live Render service** — that happens after the next deploy. |
+| **Status** | **Completed** 25 Nov. AC-9 passed against the live service. Two follow-ups below: the live website is still serving the old `chat.js`, and the `Retry-After` CORS fix needs the next deploy. |
 
 CORS, the other half of 3.5, was already in place and was verified in use
 during 3.4. See [17](17_github_pages.md).
@@ -186,11 +186,49 @@ widget, served from a local web server, and driven with Chromium.
 The browser console logs "Failed to load resource: 429" on each refusal. That
 is the browser noting the HTTP status, not a fault in the page.
 
+## AC-9 on the live service
+
+Run 25 November 2026, 10:46 PKT, from the live website
+(<https://shazil-qureshi.github.io/realestate-chatbot/>) against the live
+Render backend, after confirming the deploy carried the new code: `/health`
+reported
+`"rate_limits":{"enabled":true,"chat_per_minute":10,...}`.
+
+Eleven questions were sent from the page in 3 seconds.
+
+| Check | Result |
+|---|---|
+| Questions allowed | **10** |
+| Questions refused with 429 | **1** |
+| Any other status | none |
+| The refusal message | **"Too many questions too quickly. Please wait 60 seconds and try again."** |
+| A visitor asking through the widget while limited | sees a clear "too many questions" message |
+
+**AC-9: Pass.**
+
+### Two things this test found
+
+**1. `Retry-After` could not be read by the page.** The server sends the
+header, but a browser hides every response header from JavaScript unless the
+server names it in `Access-Control-Expose-Headers`. `expose_headers=["Retry-After"]`
+has been added to the CORS settings. Nothing was broken by this: the widget
+reads the message text, not the header. It is only now that the header is
+usable at all, for example to show a countdown later. **Not yet verified on the
+live service** - that needs the next deploy.
+
+**2. The live website was still serving the old `web/chat.js`.** The new file
+is in the repository (commit `c75bf1b`), but GitHub Pages had not republished
+it, so the widget showed its older fallback wording - "Too many questions in a
+short time. Wait a minute, then try again." - instead of the server's exact
+one. Both are clear, so AC-9 still passes, but the improvement is not visible
+to visitors until Pages republishes.
+
 ## Not yet done
 
 | Item | Why |
 |---|---|
-| AC-9 against the live Render service | Needs the next deploy. The test is: ask the live demo 11 questions inside a minute and read the 11th answer. |
+| GitHub Pages serving the new `chat.js` | The Actions run needs checking; until then visitors see the older 429 wording |
+| `expose_headers=["Retry-After"]` verified live | Needs the next deploy |
 | Tuning `RATE_CHAT_TOTAL_PER_DAY` to the real quota | Needs the number from <https://aistudio.google.com/rate-limit> (RATE-01) |
 
 ## Files changed

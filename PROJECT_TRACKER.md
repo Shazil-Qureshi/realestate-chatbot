@@ -44,7 +44,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 | 3.2 | Dockerfile — builds on Render with the 56-chunk index inside (DOCK-01..06 Pass, 24 Nov); `docs/15_docker.md` | Completed |
 | 3.3 | Backend hosting on Render free — live at https://realestate-chatbot-4707.onrender.com; /health, /chat, /lead (demo) and wake-after-sleep (DOCK-07, AC-10) Pass, 24 Nov; `docs/16_render.md` | Completed |
 | 3.4 | Website on GitHub Pages — live at <https://shazil-qureshi.github.io/realestate-chatbot/>, widget calls the Render backend; PAGE-01..10 Pass (25 Nov); `docs/17_github_pages.md` | Completed |
-| 3.5 | CORS and rate limiting — CORS verified live in 3.4; rate limiting built with no new package, RL-01..22 Pass (25 Nov); `docs/18_rate_limiting.md`. **AC-9 on the live service still to run after the next deploy.** | In Progress |
+| 3.5 | CORS and rate limiting — CORS verified live in 3.4; rate limiting with no new package, RL-01..22 Pass, 74 tests green, **AC-9 Pass on the live service** (10 allowed, 11th refused, 25 Nov); `docs/18_rate_limiting.md` | Completed |
 | 3.6 | Live tests and security checklist | Not Started |
 
 ## Stage 4 – Finalisation and portfolio (Day 4)
@@ -70,11 +70,12 @@ Status values: Not Started · In Progress · Completed · Blocked
 | RET-02 | Retrieval can miss a chunk the answer needs (the offices chunk was absent for the Lahore question) | 1.8 | Mitigated by rule 8. A broader fix would be metadata filtering or a larger `TOP_K`. |
 | RATE-01 | Free-tier requests-per-minute and per-day for this account | 1.5 | **Closed for design 25 Nov** — Google's docs no longer publish per-model free-tier numbers; they are per account at <https://aistudio.google.com/rate-limit>. The limiter no longer depends on them: it sets its own caps, all env-tunable. Still worth reading the number once to tune `RATE_CHAT_TOTAL_PER_DAY`. |
 | AC-6 | Live demo not yet opened on a real phone (laptop half is Pass) | 3.4 | Open — one question from a phone browser |
-| AC-9 | Rate limiting not yet proved against the live Render service (unit tests and a browser check pass) | 3.5 | Open — ask the live demo 11 questions in a minute after the next deploy |
+| PAGES-01 | The live website still serves the old `web/chat.js`, so visitors see the older 429 wording | 3.5 | Open — check the Pages Actions run |
+| CORS-02 | `expose_headers=["Retry-After"]` added after the live AC-9 test; not yet verified on the live service | 3.5 | Open — verify after the next deploy |
 | RET-04 | AC-1 fails: "3-bedroom houses in DHA?" misses BRE-S-102 (the only DHA listing); bedroom words outrank the area | 2.5 | Open — metadata filtering (area, bedrooms, sale/rent) in Stage 4; add a regression test |
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 21 of 28 tasks completed.** Stages 1 and 2 complete. Stage 3: 3.1–3.4 done; 3.5 code complete and unit-tested, waiting on a deploy to prove AC-9 on the live service; 3.6 next.
+**Progress: 22 of 28 tasks completed.** Stages 1 and 2 complete. Stage 3: 3.1–3.5 done, 3.6 (live tests and security checklist) next.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).

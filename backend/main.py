@@ -243,6 +243,10 @@ app.add_middleware(
     allow_credentials=False,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
+    # A browser hides every response header from the page's JavaScript unless
+    # the server names it here. Retry-After is sent with a 429, and the widget
+    # could not read it until this was added (found while testing AC-9 live).
+    expose_headers=["Retry-After"],
 )
 
 
