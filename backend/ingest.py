@@ -30,6 +30,8 @@ import sys
 import time
 from pathlib import Path
 
+import listing_meta
+
 # ---------------------------------------------------------------------------
 # Settings
 # ---------------------------------------------------------------------------
@@ -102,6 +104,73 @@ def split_long_section(body):
         pieces.append(current)
 
     return pieces
+
+
+def refresh_metadata(collection, all_chunks, existing_ids):
+    """
+    Bring stored chunks' metadata up to date without re-embedding anything.
+
+    Task 4.1 added facts to each listing chunk (area, bedrooms, sale or rent).
+    An index built before that has the right text and the right embeddings but
+    none of those facts, and because this script skips chunks it has already
+    stored, they would never arrive.
+
+    The text has not changed, so the embeddings have not changed either. Only
+    the metadata needs replacing, and `collection.update` does that on its
+    own. **No Gemini request is made here, so this costs nothing.**
+    """
+    wanted = {c["id"]: c["metadata"] for c in all_chunks if c["id"] in existing_ids}
+    if not wanted:
+        return
+
+    try:
+        stored = collection.get(ids=list(wanted), include=["metadatas"])
+    except Exception as error:
+        info(f"Could not read stored metadata, leaving it alone ({error})")
+        return
+
+    stale_ids, stale_metas = [], []
+    for chunk_id, current in zip(stored.get("ids", []), stored.get("metadatas", [])):
+        if (current or {}) != wanted[chunk_id]:
+            stale_ids.append(chunk_id)
+            stale_metas.append(wanted[chunk_id])
+
+    if not stale_ids:
+        info("Stored metadata is already up to date")
+        return
+
+    try:
+        collection.update(ids=stale_ids, metadatas=stale_metas)
+    except Exception as error:
+        bad(f"Could not update metadata: {error}")
+        return
+
+    listings = sum(1 for m in stale_metas if m.get("is_listing"))
+    ok(f"Metadata refreshed on {len(stale_ids)} chunks "
+       f"({listings} of them property listings). No embeddings were needed.")
+
+
+def listing_metadata(base, section_heading, body):
+    """
+    Add the plain facts of a property listing to a chunk's metadata.
+
+    Company pages and FAQs are left exactly as they were: parse_listing only
+    recognises a "BRE-x-nnn - ..." heading, and returns None for anything
+    else. ChromaDB only stores simple values, so the area keys are joined
+    into one string and `area_key` holds the one used for filtering.
+    """
+    facts = listing_meta.parse_listing(section_heading, body)
+    if not facts:
+        return base
+
+    merged = dict(base)
+    keys = facts.pop("area_keys", "")
+    merged.update(facts)
+    merged["area_keys"] = keys
+    # The field questions are filtered on. Every listing in this data set has
+    # exactly one area key; if one ever had two, the first is the primary.
+    merged["area_key"] = keys.split(",")[0] if keys else ""
+    return merged
 
 
 def chunk_markdown_file(path):
@@ -179,12 +248,16 @@ def chunk_markdown_file(path):
                 {
                     "id": chunk_id,
                     "text": text,
-                    "metadata": {
-                        "source": relative,
-                        "title": title,
-                        "heading": section_heading,
-                        "part": part_index,
-                    },
+                    "metadata": listing_metadata(
+                        {
+                            "source": relative,
+                            "title": title,
+                            "heading": section_heading,
+                            "part": part_index,
+                        },
+                        section_heading,
+                        piece,
+                    ),
                 }
             )
 
@@ -363,6 +436,7 @@ def main():
 
     if existing_ids:
         info(f"{len(existing_ids)} chunks already stored, {len(todo)} to go")
+        refresh_metadata(collection, all_chunks, existing_ids)
 
     if not todo:
         ok("Everything is already ingested. Nothing to do.")

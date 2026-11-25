@@ -56,6 +56,16 @@ COLLECTION_NAME = "bella_real_estate"
 # CHAT-11 measures whether 8 is enough.
 TOP_K = 8
 
+# How many of the TOP_K places may be given to listings in an area the
+# question names. The rest still come from ordinary meaning-based search.
+AREA_SLOTS = 4
+
+# Which area names the stored listings can be filtered by. Built from the
+# index at startup, so it is whatever is actually in the data. If the index
+# was built before Task 4.1 it has no area metadata, this stays empty, and
+# retrieval behaves exactly as it did before.
+AREA_VOCABULARY: set[str] = set()
+
 # Questions longer than this are rejected rather than sent to the API.
 MAX_QUESTION_CHARS = 1000
 
@@ -99,7 +109,7 @@ DEFAULT_ORIGINS = ["http://localhost:5500", "http://127.0.0.1:5500"]
 
 # Bump this whenever SYSTEM_INSTRUCTION changes. /health reports it, so a
 # test run can prove which rules the running server is actually using.
-PROMPT_VERSION = "2026-11-16c (9 rules, completeness rule 8)"
+PROMPT_VERSION = "2026-11-25a (10 rules, near matches rule 10)"
 
 SYSTEM_INSTRUCTION = """\
 You are the customer support assistant for Bella Real Estate, an estate agency
@@ -115,11 +125,14 @@ without exception.
    not have that information and offer to pass the question to the team. Never
    guess, never estimate, and never fill a gap with something plausible.
 
-3. Respect every constraint in the question. If the customer names a city, a
-   budget, a number of bedrooms or a property type, only mention properties
-   that match all of them. The extracts may include properties that do not
-   match - ignore those. If nothing in the extracts matches, say nothing
-   matches rather than offering the closest thing.
+3. Respect every constraint in the question, and never present a property as
+   matching when it does not. The extracts may include properties that do not
+   match; do not pass those off as matches.
+
+   A PLACE is a hard constraint. A city, or an area such as DHA, F-11 or
+   Bahria Town, is what the customer actually came for. Never offer a
+   property in a different place as an alternative, and never let one drift
+   into the answer. Someone asking about DHA does not want Bahria Town.
 
 4. Never invent a price, a reference code, a size, or an availability status.
    Quote them exactly as written in the extracts or do not mention them.
@@ -143,6 +156,22 @@ without exception.
    asks about any other city, answer directly that the company does not
    operate there. Do not say you lack the information. Where the company works
    is a fact about the company, not a gap in your extracts.
+
+10. INSIDE the place the customer named, a near match is useful and "I do not
+    have that information" is not. If the extracts contain properties in that
+    place, but none meets every other detail the customer asked for - the
+    number of bedrooms, the size, the price - then say plainly that none
+    matches, and offer what is there, making clear how each one differs.
+
+    For example, asked for a three-bedroom house in an area where the only
+    property has four bedrooms: the right answer is that there is no
+    three-bedroom house in that area, and that the one available has four.
+    The wrong answer is that you have no information. You do have it, and the
+    customer can use it.
+
+    This applies only within the place the customer named. Never reach into
+    another city or area for a near match - rule 3 still holds. And this is
+    not permission to guess: everything you say still comes from the extracts.
 """
 
 # ---------------------------------------------------------------------------
@@ -166,6 +195,7 @@ if not DB_DIR.exists():
 
 from leads import LeadIn, handle_lead  # noqa: E402
 import ratelimit  # noqa: E402
+import listing_meta  # noqa: E402
 
 # Loading ChromaDB and the Gemini library is the slow part of starting up.
 # On the laptop it takes seconds. On Render's free server (a tenth of a CPU)
@@ -185,7 +215,7 @@ READY = threading.Event()
 
 def load_knowledge():
     """Open the Gemini client and the vector database. Sets READY when done."""
-    global gemini, types, collection, CHUNK_COUNT, LOAD_ERROR
+    global gemini, types, collection, CHUNK_COUNT, LOAD_ERROR, AREA_VOCABULARY
     started = time.monotonic()
     try:
         print("[startup] loading ChromaDB and Gemini libraries...", flush=True)
@@ -215,6 +245,18 @@ def load_knowledge():
         LOAD_ERROR = str(error)
         print(f"[startup] FAILED after {time.monotonic() - started:.1f} s: {error}", flush=True)
     finally:
+        try:
+            stored = collection.get(include=["metadatas"])
+            AREA_VOCABULARY = {
+                meta.get("area_key")
+                for meta in (stored.get("metadatas") or [])
+                if meta and meta.get("area_key")
+            }
+        except Exception:
+            # Not fatal: without a vocabulary the chatbot simply falls back to
+            # plain meaning-based search, which is what it did before 4.1.
+            AREA_VOCABULARY = set()
+
         READY.set()
 
 
@@ -298,7 +340,67 @@ def health():
         "leads_go_to": LEADS_GO_TO,
         "leads_demo": LEADS_DEMO_MODE,
         "rate_limits": ratelimit.settings_summary(),
+        "area_filtering": len(AREA_VOCABULARY),
     }
+
+
+def retrieve(question, question_vector):
+    """
+    Find the chunks to answer from.
+
+    Meaning-based search alone cannot honour a hard constraint like an area:
+    asking for "3-bedroom houses in DHA" fills the results with 3-bedroom
+    listings from everywhere and pushes the only DHA house out (RET-04).
+
+    So when the question names an area the data knows about, a second search
+    is run that is restricted to that area, and those chunks are placed first.
+    Nothing is thrown away: the ordinary results fill the remaining places.
+
+    Note what is deliberately NOT filtered: the number of bedrooms. Filtering
+    on both area and bedrooms would return nothing for "3-bedroom in DHA" -
+    there is no such listing - and the chatbot would again say it has no
+    information. Returning the area's listings lets it give the useful answer:
+    there is no 3-bedroom house in DHA, the nearest is BRE-S-102 with 4.
+    """
+    found = collection.query(query_embeddings=[question_vector], n_results=TOP_K)
+
+    ids = (found.get("ids") or [[]])[0]
+    documents = (found.get("documents") or [[]])[0]
+    metadatas = (found.get("metadatas") or [[]])[0]
+    distances = (found.get("distances") or [[]])[0]
+
+    areas = listing_meta.areas_in_question(question, AREA_VOCABULARY)
+    if not areas:
+        return documents, metadatas, distances
+
+    area = areas[0]
+    try:
+        extra = collection.query(
+            query_embeddings=[question_vector],
+            n_results=AREA_SLOTS,
+            where={"area_key": area},
+        )
+    except Exception:
+        # A filter failure must never cost the visitor an answer.
+        return documents, metadatas, distances
+
+    extra_ids = (extra.get("ids") or [[]])[0]
+    if not extra_ids:
+        return documents, metadatas, distances
+
+    merged = listing_meta.merge_hits(
+        {"ids": ids, "documents": documents,
+         "metadatas": metadatas, "distances": distances},
+        {"ids": extra_ids,
+         "documents": (extra.get("documents") or [[]])[0],
+         "metadatas": (extra.get("metadatas") or [[]])[0],
+         "distances": (extra.get("distances") or [[]])[0]},
+        TOP_K,
+    )
+
+    print(f"[retrieve] area '{area}' matched {len(extra_ids)} listing(s); "
+          f"{len(merged['ids'])} chunks sent to the model", flush=True)
+    return merged["documents"], merged["metadatas"], merged["distances"]
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -347,17 +449,11 @@ def chat(request: ChatRequest, http_request: Request):
 
     # --- 2. Find the closest chunks ---------------------------------------
     try:
-        found = collection.query(
-            query_embeddings=[question_vector], n_results=TOP_K
-        )
+        documents, metadatas, distances = retrieve(question, question_vector)
     except Exception as error:
         raise HTTPException(
             status_code=503, detail=f"Could not search the knowledge base: {error}"
         )
-
-    documents = found.get("documents", [[]])[0]
-    metadatas = found.get("metadatas", [[]])[0]
-    distances = found.get("distances", [[]])[0]
 
     if not documents:
         return ChatResponse(
@@ -448,6 +544,8 @@ if __name__ == "__main__":
     print(f"  Leads go to:    {LEADS_GO_TO}")
     print(f"  Allowed origins: {ALLOWED_ORIGINS or DEFAULT_ORIGINS}")
     print(f"  Rate limits:     {ratelimit.settings_summary()}")
+    print(f"  Area filtering:  {len(AREA_VOCABULARY)} areas "
+          f"({', '.join(sorted(AREA_VOCABULARY)) if AREA_VOCABULARY else 'none - run ingest.py'})")
     print()
     print("  Open http://127.0.0.1:8000/docs to try it.")
     print("  Press Ctrl+C to stop.")

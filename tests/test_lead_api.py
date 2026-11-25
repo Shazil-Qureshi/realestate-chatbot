@@ -15,10 +15,15 @@ or in backend/leads/pending.jsonl until then. Delete it from there if you like.
 Uses no Gemini quota.
 """
 
+import os
+
 import httpx
 import pytest
 
-BASE_URL = "http://127.0.0.1:8000"
+# Which server to test. Defaults to the one you run with
+# "python backend\\main.py"; set BELLA_TEST_URL to point somewhere else,
+# which is how check_41.py tests a temporary server without disturbing it.
+BASE_URL = os.environ.get("BELLA_TEST_URL", "http://127.0.0.1:8000").rstrip("/")
 
 VALID = {
     "name": "Automated Test",

@@ -26,3 +26,6 @@ backend/leads/
 
 # Saved console output from test runs (local only)
 test_output*.txt
+
+# One-off checker output (Task 4.1)
+check_41_output.txt

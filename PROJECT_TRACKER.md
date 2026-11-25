@@ -51,7 +51,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 
 | ID | Task | Status |
 |---|---|---|
-| 4.1 | Full system test and fixes | Not Started |
+| 4.1 | Full system test and fixes — area filtering for RET-04 **plus** system-instruction rule 10 for near matches; **AC-1 Pass**, 14/14 chat tests, 110 in total; `docs/20_area_filtering.md` | Completed |
 | 4.2 | README, diagrams, API documentation | Not Started |
 | 4.3 | Demo video script and screenshots | Not Started |
 | 4.4 | Final report, portfolio and LinkedIn text | Not Started |
@@ -74,10 +74,10 @@ Status values: Not Started · In Progress · Completed · Blocked
 | AC-6 | Live demo not yet opened on a real phone (laptop half is Pass) | 3.4 | Open — one question from a phone browser |
 | PAGES-01 | GitHub Pages stopped republishing: "No artifacts named github-pages were found" while the artifact was plainly created | 3.5 | **Closed 25 Nov** — fixed by adding `actions: read` and splitting upload and deploy into two jobs. Both applied together, so which one was the cause is unconfirmed. New `chat.js` is live. |
 | CORS-02 | `expose_headers=["Retry-After"]` | 3.5 | **Closed 25 Nov** — verified live: a refused request returned a readable `Retry-After: 60` |
-| RET-04 | AC-1 fails: "3-bedroom houses in DHA?" misses BRE-S-102 (the only DHA listing); bedroom words outrank the area | 2.5 | Open — metadata filtering (area, bedrooms, sale/rent) in Stage 4; add a regression test |
+| RET-04 | AC-1 failed: "3-bedroom houses in DHA?" missed BRE-S-102 | 2.5 | **Closed 25 Nov** — needed two fixes: area metadata + area-restricted search, and a change to system-instruction rule 3, which had forbidden near matches outright. AC-1 verified passing (CHAT-12). |
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 23 of 28 tasks completed.** Stages 1, 2 and 3 complete. Stage 4 (finalisation and portfolio) next. AC-6 (phone) is the one acceptance criterion still unrun.
+**Progress: 24 of 28 tasks completed.** Stages 1–3 complete. Stage 4: 4.1 done, 4.2 (README, diagrams, API docs) next. AC-6 (phone) is the one acceptance criterion still unrun.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).

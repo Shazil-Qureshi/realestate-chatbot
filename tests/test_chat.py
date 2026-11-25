@@ -19,12 +19,17 @@ Each test costs two Gemini requests, one to embed the question and one to
 answer it. The whole file is roughly 20 requests.
 """
 
+import os
 import re
+import time
 
 import httpx
 import pytest
 
-BASE_URL = "http://127.0.0.1:8000"
+# Which server to test. Defaults to the one you run with
+# "python backend\\main.py"; set BELLA_TEST_URL to point somewhere else,
+# which is how check_41.py tests a temporary server without disturbing it.
+BASE_URL = os.environ.get("BELLA_TEST_URL", "http://127.0.0.1:8000").rstrip("/")
 TIMEOUT = 60.0
 
 # Properties in Rawalpindi. If the customer asked for Islamabad, none of these
@@ -52,20 +57,51 @@ ADMISSIONS = [
 # Helpers
 # ---------------------------------------------------------------------------
 
-def ask(question):
-    """Send one question and return the parsed response."""
-    try:
-        response = httpx.post(
-            f"{BASE_URL}/chat", json={"message": question}, timeout=TIMEOUT
-        )
-    except httpx.ConnectError:
-        pytest.skip(
-            f"No server at {BASE_URL}. Start it with: python backend\\main.py"
-        )
-    assert response.status_code == 200, (
-        f"Expected 200, got {response.status_code}: {response.text}"
-    )
-    return response.json()
+def ask(question, attempts=3):
+    """
+    Send one question and return the parsed response.
+
+    Gemini sometimes answers 503 UNAVAILABLE ("experiencing high demand").
+    That is an outage at Google, not a fault in this project, and on
+    25 Nov 2026 it failed a run of CHAT-12 in a way that looked exactly like
+    a broken answer. So a 503 is retried a few times with a growing pause.
+
+    It is never skipped and never swallowed: if the model is still refusing
+    after the last attempt, the test fails and says plainly that the cause
+    was upstream, so nobody mistakes it for a defect here.
+    """
+    last = None
+    for attempt in range(1, attempts + 1):
+        try:
+            response = httpx.post(
+                f"{BASE_URL}/chat", json={"message": question}, timeout=TIMEOUT
+            )
+        except httpx.ConnectError:
+            pytest.skip(
+                f"No server at {BASE_URL}. Start it with: python backend\\main.py"
+            )
+
+        if response.status_code == 200:
+            return response.json()
+
+        last = response
+        if response.status_code == 503 and "UNAVAILABLE" in response.text:
+            if attempt < attempts:
+                pause = 5 * attempt
+                print(
+                    f"    [Gemini busy, 503. Waiting {pause}s and trying again "
+                    f"({attempt} of {attempts - 1} retries)]"
+                )
+                time.sleep(pause)
+                continue
+            pytest.fail(
+                f"Gemini returned 503 UNAVAILABLE {attempts} times in a row. "
+                f"This is an outage at Google, not a fault in this project. "
+                f"Re-run when it recovers. Response: {last.text[:300]}"
+            )
+        break
+
+    pytest.fail(f"Expected 200, got {last.status_code}: {last.text[:300]}")
 
 
 def show(label, data):
@@ -327,4 +363,59 @@ def test_chat_11_completeness():
         f"metadata filter on bedroom count is the next step.\n\n"
         f"ANSWER GIVEN:\n{answer}\n\n"
         f"RETRIEVED HEADINGS:\n{retrieved}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# CHAT-12  AC-1: an area named in the question must reach that area's listings
+# ---------------------------------------------------------------------------
+
+
+def test_chat_12_area_constraint_ac1():
+    """
+    The regression test for RET-04, added in Task 4.1.
+
+    AC-1 has failed since Stage 2. "Do you have 3-bedroom houses in DHA?"
+    returned "I do not have that information in my extracts", because meaning
+    based search filled all eight results with 3-bedroom listings from other
+    areas and pushed the only DHA property out.
+
+    The data has exactly one DHA property: BRE-S-102, a 4-bedroom house in
+    DHA Phase 2. There is no 3-bedroom house in DHA. So the correct answer is
+    not "I don't know" and not an invented listing - it is to say there is no
+    3-bedroom house in DHA and name BRE-S-102 as the nearest.
+
+    Task 4.1 stores the area with each listing and runs a second, area
+    restricted search when the question names one. Bedrooms are deliberately
+    NOT filtered: doing so would return nothing here and bring back the old
+    unhelpful answer.
+
+    LM-03 guards the assumption behind this test: if the data ever gains a
+    3-bedroom DHA house, LM-03 fails first and this test must be rewritten.
+    """
+    data = ask("Do you have 3-bedroom houses in DHA?")
+    show("CHAT-12 AC-1 area constraint", data)
+
+    answer = data["answer"]
+    retrieved = " ".join(
+        f"{s.get('heading','')} {s.get('source','')}" for s in data["sources"]
+    )
+
+    assert "BRE-S-102" in retrieved, (
+        "The only DHA listing was not even retrieved. Area filtering is not "
+        "working. Check that /health reports a non-zero 'area_filtering', "
+        "which means the index carries the area metadata added in Task 4.1. "
+        "If it is 0, re-run: python backend\\ingest.py"
+    )
+
+    assert "BRE-S-102" in answer, (
+        "BRE-S-102 was retrieved but the answer does not mention it. "
+        "Retrieval is fixed; the system instruction is what needs attention. "
+        f"Answer was: {answer}"
+    )
+
+    # It must not claim a 3-bedroom DHA house exists.
+    other_codes = [c for c in REF_CODE.findall(answer) if c != "BRE-S-102"]
+    assert not other_codes, (
+        f"The answer names properties that are not in DHA: {other_codes}"
     )

@@ -137,12 +137,71 @@ after the test has actually been run.
 | AC-6 phone half | **Not run** |
 | NFR-01 speed live | **Pass** - 1.9 s and 2.0 s |
 
+- Task 4.1 (in progress): built the fix for RET-04, open since Stage 2.
+  Listings now carry their area, city, bedrooms and sale/rent as plain facts,
+  and a question naming an area gets a second, area-restricted search whose
+  results go first. 35 new unit tests; 91 offline tests pass.
+- Added CHAT-12, the regression test for AC-1 itself.
+- Wrote `docs/20_area_filtering.md`.
+
+### What I learned (4.1)
+- Meaning-based search cannot honour a hard constraint. "In DHA" is a must-be,
+  not a flavour, and no amount of raising TOP_K or adding prompt rules fixes
+  that - those patched the symptom three times (RET-01, RET-02, RET-03).
+- The tempting move was to filter on area **and** bedrooms. That would have
+  made AC-1 worse: there is no 3-bedroom house in DHA, so filtering on both
+  returns nothing and the bot says "I don't know" again. Filter the hard
+  constraint, let the model reason about the soft one.
+- The feature turns itself off when the index lacks the new metadata, so an
+  old index behaves exactly as before instead of breaking.
+- Metadata can be updated without re-embedding, because the text did not
+  change. Refreshing an existing index costs no Gemini quota at all.
+- Pulling the merge step out into a plain function made it testable without a
+  database; the endpoint it came from still cannot be tested here.
+
+### Tests executed (4.1)
+| Tests | Result |
+|---|---|
+| LM-01..20 (`tests/test_listing_meta.py`, 35 cases) | **35 passed** |
+| All offline suites (lead, rate limit, listing meta) | **91 passed** |
+| CHAT-12 / AC-1 | **Not yet run** - needs a refreshed index and a running server |
+
+- **AC-1 passes.** RET-04 is closed, after being open since Stage 2.
+
+### What I learned (4.1, part two)
+- The retrieval fix was only half of it. With BRE-S-102 finally being
+  retrieved, the chatbot *still* said it had no information - because
+  system-instruction rule 3 said "if nothing matches, say nothing matches
+  rather than offering the closest thing". The model was obeying correctly.
+  **The bug was in my own instruction, not the code.**
+- Rule 3 had over-generalised: it was written to stop Rawalpindi houses being
+  offered for an Islamabad question, which is right, but it applied the same
+  ban to bedroom counts, which is wrong. Place is hard; the rest is not.
+- Changing a load-bearing rule means re-running the whole file, not the one
+  test you care about. CHAT-03 and CHAT-05 are what would have caught an
+  over-loosened rule 3; both still pass.
+- The new rule names no real reference code as an example, because a code in
+  the system instruction is a code the model can emit for the wrong question.
+- The retrieved distances settled the design argument: BRE-S-102 came back at
+  0.2729, the furthest of the nine chunks - below a page about booking a
+  viewing. No realistic TOP_K would have caught it.
+- A test can fail for reasons that have nothing to do with the project. The
+  first re-run "failed" because Gemini answered 503 UNAVAILABLE. `ask()` now
+  retries an upstream 503 three times and, if it persists, fails with a
+  message saying the cause was at Google - never a silent skip.
+
+### Tests executed (4.1, part two)
+| Tests | Result |
+|---|---|
+| `tests/test_chat.py` against the new prompt | **14 passed** |
+| CHAT-12 / AC-1 | **Pass** - "We do not have any 3-bedroom houses in DHA. The only property we have in DHA is a 4-bedroom house: BRE-S-102" |
+| CHAT-03, CHAT-05 (would catch an over-loosened rule 3) | **Pass** |
+
 ### Next task
-- Stage 4: 4.1 full system test and fixes. RET-04 (metadata filtering) is the
-  main piece of work waiting there.
+- 4.2: README, diagrams and API documentation.
 
 ### Progress
-23 of 28 tasks completed. Stage 3 complete.
+24 of 28 tasks completed. 4.1 complete.
 
 ---
 
