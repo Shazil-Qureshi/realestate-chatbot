@@ -225,11 +225,37 @@ after the test has actually been run.
 | Both README Mermaid diagrams compiled with mmdc | **Pass** - and inspected as images |
 | API reference checked against the code, not memory | 2 corrections made (422 shape, 503 wording) |
 
+- Task 4.3: wrote `docs/22_demo.md` - a timed video script, a pre-record
+  safety checklist and an eight-shot screenshot list.
+- **Verified AC-1 on the live service**, not just locally: the public demo
+  answers the DHA question correctly, in 1.7 s.
+
+### What I learned (4.3)
+- Measure before scripting. Five live questions took 1.7, 1.8, 2.0, 2.1 and
+  **10.1** seconds. The slow one was the fees question, so the script leads
+  with the DHA question instead - the fastest and the most interesting.
+- That 10.1 s is against an NFR-01 requirement of "within 10 seconds". One
+  outlier among five is not a trend, but it is on the limit, so it is logged
+  rather than quietly dropped.
+- A demo of a sleeping free tier needs a warm-up step written into the script,
+  or the first minute is dead air.
+- The recording checklist exists because of the secret leak earlier in this
+  project: a frame can expose a key or a client secret just as easily as a
+  commit can, and it is harder to take back.
+
+### Tests executed (4.3)
+| Tests | Result |
+|---|---|
+| AC-1 on the live public demo | **Pass** - BRE-S-102 named, 1.7 s |
+| Live prompt version and area filtering | `2026-11-25a`, 12 areas |
+| Latency, five live questions | 1.7 / 1.8 / 2.0 / 2.1 / 10.1 s |
+
 ### Next task
-- 4.3: demo video script and screenshots.
+- Record the video and capture the eight screenshots, then 4.4: final report,
+  portfolio and LinkedIn text.
 
 ### Progress
-25 of 28 tasks completed. 4.2 complete.
+25 of 28 tasks completed. 4.3 script written; recording is outstanding.
 
 ---
 

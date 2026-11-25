@@ -244,9 +244,18 @@ with a growing pause. It is never skipped and never swallowed: if the model is
 still refusing after the last try, the test **fails** and says plainly that the
 cause was at Google, so nobody mistakes an outage for a defect here.
 
-## Still to do
+## Verified on the live service
 
-| Item | Why |
-|---|---|
-| Live | Deploy, then ask the live demo the DHA question |
-| Full suite | `pytest tests -v` - expect 110 |
+25 November 2026, 22:21 PKT. The live backend reported
+`prompt_version: 2026-11-25a (10 rules, near matches rule 10)` and
+`area_filtering: 12`, and the live site answered:
+
+> I do not have a 3-bedroom house in DHA in the extracts.
+>
+> The only property I have in DHA is a 4-bedroom house:
+> - BRE-S-102: 10 Marla House, DHA Phase 2, Islamabad (4 bedrooms, PKR 5.75 crore)
+>
+> Would you like to know more about it?
+
+Top source: `BRE-S-102 - 10 Marla House, DHA Phase 2, Islamabad`. Answered in
+1.7 seconds. **AC-1 passes in production**, not only on the laptop.

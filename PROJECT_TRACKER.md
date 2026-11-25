@@ -53,7 +53,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 |---|---|---|
 | 4.1 | Full system test and fixes — area filtering for RET-04 **plus** system-instruction rule 10 for near matches; **AC-1 Pass**, 14/14 chat tests, 110 in total; `docs/20_area_filtering.md` | Completed |
 | 4.2 | README, diagrams, API documentation — README rewritten for a reviewer with two Mermaid diagrams (both rendered and checked); `docs/21_api_reference.md` | Completed |
-| 4.3 | Demo video script and screenshots | Not Started |
+| 4.3 | Demo video script and screenshots — timed script with measured latencies and a pre-record safety checklist; 8-shot screenshot list; `docs/22_demo.md`. **Recording and capture are the owner's to do.** | In Progress |
 | 4.4 | Final report, portfolio and LinkedIn text | Not Started |
 | 4.5 | Internship progress report | Not Started |
 
@@ -71,6 +71,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 | RATE-01 | Free-tier requests-per-minute and per-day for this account | 1.5 | **Closed for design 25 Nov** — Google's docs no longer publish per-model free-tier numbers; they are per account at <https://aistudio.google.com/rate-limit>. The limiter no longer depends on them: it sets its own caps, all env-tunable. Still worth reading the number once to tune `RATE_CHAT_TOTAL_PER_DAY`. |
 | SEC-07 | An employer GitHub account name was in `docs/14_github.md`, and that file also wrongly claimed a search for it found nothing | 3.6 | **Partly closed 25 Nov** — removed from the text and the false claim corrected. Still in that file's Git history (20 commits). Rewriting history is the owner's call. |
 | SEC-19 | HTTP response security headers never verified (CORS hides them from the page; the workspace cannot reach the host) | 3.6 | Open — not tested, not a pass |
+| NFR-01 | One live answer took 10.1 s against a "within 10 seconds" requirement; the other four in the same run took 1.7–2.1 s | 4.3 | Open — watch it. Median is ~2 s, so this is an outlier rather than a trend, but it is on the limit. |
 | AC-6 | Live demo not yet opened on a real phone (laptop half is Pass) | 3.4 | Open — one question from a phone browser |
 | PAGES-01 | GitHub Pages stopped republishing: "No artifacts named github-pages were found" while the artifact was plainly created | 3.5 | **Closed 25 Nov** — fixed by adding `actions: read` and splitting upload and deploy into two jobs. Both applied together, so which one was the cause is unconfirmed. New `chat.js` is live. |
 | CORS-02 | `expose_headers=["Retry-After"]` | 3.5 | **Closed 25 Nov** — verified live: a refused request returned a readable `Retry-After: 60` |
@@ -78,6 +79,6 @@ Status values: Not Started · In Progress · Completed · Blocked
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 25 of 28 tasks completed.** Stages 1–3 complete. Stage 4: 4.1 and 4.2 done, 4.3 (demo video script and screenshots) next. AC-6 (phone) is the one acceptance criterion still unrun.
+**Progress: 25 of 28 tasks completed.** Stages 1–3 complete. Stage 4: 4.1 and 4.2 done; 4.3 script written, recording outstanding. AC-6 (phone) still unrun.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).
