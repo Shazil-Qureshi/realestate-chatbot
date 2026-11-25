@@ -5,6 +5,126 @@ after the test has actually been run.
 
 ---
 
+## Session 11 · 25 November 2026
+
+**Stage:** 3 – GitHub and deployment
+
+### Completed
+- Task 3.4: the website is live at
+  <https://shazil-qureshi.github.io/realestate-chatbot/>, published by a GitHub
+  Actions workflow, with the chat widget calling the Render backend.
+- Tested the live site end to end from Chrome: question answered, off-topic
+  question declined, demo lead form validated and discarded, no browser errors.
+- Wrote `docs/17_github_pages.md`.
+
+### What I learned
+- GitHub Pages can publish only the repository root or `docs/` with the simple
+  setting. A workflow with `upload-pages-artifact` and `path: web` publishes any
+  folder, so no file had to be moved.
+- `.github/workflows/` is a protected path: the assistant's remote file tools
+  cannot write there. Creating the file on the GitHub website and then
+  `git pull` is the way round it.
+- Render refuses a second environment variable with the same key. An existing
+  one must be edited.
+- **A test result is only real if the test was run.** Early in this session the
+  assistant wrote a 3.4 test report, a `docs/17` and tracker updates that had
+  never happened. It was caught by checking the files, the report was withdrawn,
+  and the tests above were then actually run before anything was recorded. The
+  rule in this log exists for a reason.
+
+### Tests executed
+| Tests | Result |
+|---|---|
+| PAGE-01..10 (live site: loads, banner, assets, API target, chat, off-topic, demo lead, no console errors) | Pass |
+| AC-6 laptop half | Pass |
+| AC-6 phone half | **Not yet run** |
+
+### Outstanding issues
+- AC-6 (phone), 3.5 rate limiting, RET-04, LEAD-R1, N8N-S1, RATE-01,
+  robot animation licence.
+
+- Task 3.5 (rate limiting): built `backend/ratelimit.py`, wired it into `/chat`
+  and `/lead`, and made the widget show the server's own "too many requests"
+  wording. 22 unit tests pass, plus a browser check against a stand-in backend.
+  Not yet proved on the live service: that needs the next deploy.
+- Wrote `docs/18_rate_limiting.md`.
+
+### What I learned (3.5)
+- Google no longer publishes free-tier rate limits per model; they are shown
+  per account in AI Studio. So the limiter sets its own caps instead of trying
+  to match a number that cannot be looked up, and every cap is an environment
+  variable.
+- The check has to run **before** any work, because a refused question must not
+  cost Gemini quota - and each question costs two calls, not one.
+- A refused request must not be counted, or someone retrying would push their
+  own wait out for ever.
+- Behind a proxy every visitor looks like the proxy. The real address is in
+  `X-Forwarded-For`, but that header cannot be proved genuine - which is why
+  the whole-service daily cap exists as the real protection.
+- A limit can break your own tests: `test_chat.py` sends 13 questions in under
+  a minute. Requests from the same machine are now exempt.
+- `importlib.reload` builds a **new** class object, so `pytest.raises` with a
+  name imported earlier no longer matches. Use `module.Error`, not `Error`.
+
+### Tests executed (3.5)
+| Tests | Result |
+|---|---|
+| RL-01..22 (`tests/test_rate_limit.py`) | **22 passed** |
+| `test_lead.py` + `test_rate_limit.py` together | **56 passed** |
+| Widget shows the 429 message, chat and form (Chromium, stand-in backend) | **Pass** |
+| AC-9 on the live Render service | **Not yet run** |
+
+### Next task
+- Deploy, then run AC-9 against the live demo; then 3.6 (live tests and
+  security checklist).
+
+### Progress
+21 of 28 tasks completed. 3.5 is in progress: code done, live check pending.
+
+---
+
+## Session 10 · 24 November 2026
+
+**Stage:** 3 – GitHub and deployment
+
+### Completed
+- Task 3.2: `Dockerfile` that builds the 56-chunk search index into the image,
+  using a Render build secret for the Gemini key.
+- Task 3.3: backend live on Render free at
+  <https://realestate-chatbot-4707.onrender.com>, with `LEADS_DEMO_MODE=true`.
+- Rewrote startup so the server opens its port first and loads the index in the
+  background, and made `ingest.py` stop early and exit 1 when Gemini refuses.
+- Rotated the Google OAuth client secret after it was exposed, and reconnected
+  both n8n credentials.
+
+### What I learned
+- Hugging Face Docker Spaces became paid in July 2026. Pricing has to be checked
+  **before** a hosting choice, not after.
+- Render's health check fails if a slow startup runs before the port opens.
+- A build that "succeeds" can still ship an empty index: the ingest step must
+  exit non-zero on failure, and print the cause where the log can be read.
+- A secret pasted into a form and then screenshotted is exposed. It has to be
+  rotated, not just deleted.
+
+### Tests executed
+| Tests | Result |
+|---|---|
+| DOCK-01..06 | Pass |
+| DOCK-07 / AC-10 (wake after sleep, no manual step) | Pass |
+| R-01, R-03 (live `/health`, `/chat` from outside) | Pass |
+| Lead through n8n after the secret rotation | Pass |
+
+### Outstanding issues
+- Lead data in `pending.jsonl` still not re-sent (LEAD-R1).
+
+### Next task
+- 3.4: publish the website on GitHub Pages.
+
+### Progress
+20 of 28 tasks completed.
+
+---
+
 ## Session 9 · 18 November 2026
 
 **Stage:** 3 – GitHub and deployment

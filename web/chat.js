@@ -311,7 +311,10 @@
         "or longer than " + MAX_CHARS + " characters.";
     }
     if (status === 429) {
-      return "Too many questions in a short time. Wait a minute, then try again.";
+      // The server says exactly how long to wait, or that the demo's day is
+      // spent. Prefer its wording; the fallback covers an older backend.
+      return detail || "Too many questions in a short time. Wait a minute, " +
+        "then try again.";
     }
     return "The assistant couldn't answer just now. Try again in a moment.";
   }
@@ -615,7 +618,10 @@
           if (result.status === 422) {
             showProblems(leadProblems(result.body.detail));
           } else {
-            showProblems([describeError(result.status)]);
+            showProblems([describeError(
+              result.status,
+              typeof result.body.detail === "string" ? result.body.detail : ""
+            )]);
           }
           submit.disabled = false;
           submit.textContent = "Send my details";

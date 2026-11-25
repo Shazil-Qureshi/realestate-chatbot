@@ -25,7 +25,7 @@ import time
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -165,6 +165,7 @@ if not DB_DIR.exists():
     fail(f"No database at {DB_DIR}. Run 'python backend\\ingest.py' first.")
 
 from leads import LeadIn, handle_lead  # noqa: E402
+import ratelimit  # noqa: E402
 
 # Loading ChromaDB and the Gemini library is the slow part of starting up.
 # On the laptop it takes seconds. On Render's free server (a tenth of a CPU)
@@ -260,6 +261,24 @@ class ChatResponse(BaseModel):
     sources: list[Source]
 
 
+def refuse_if_over_limit(check, http_request: Request) -> None:
+    """
+    Run one of the rate-limit gates and turn a refusal into HTTP 429.
+
+    429 is the "too many requests" code. The Retry-After header tells
+    well-behaved clients how long to wait; the detail text is what the
+    visitor actually reads in the chat window (AC-9).
+    """
+    try:
+        check(ratelimit.visitor_key(http_request))
+    except ratelimit.RateLimited as limited:
+        raise HTTPException(
+            status_code=429,
+            detail=limited.message,
+            headers={"Retry-After": str(limited.retry_after)},
+        )
+
+
 @app.get("/health")
 def health():
     """Confirm the server is running and the knowledge base is loaded."""
@@ -274,17 +293,24 @@ def health():
         # Says where leads go without revealing the webhook address itself.
         "leads_go_to": LEADS_GO_TO,
         "leads_demo": LEADS_DEMO_MODE,
+        "rate_limits": ratelimit.settings_summary(),
     }
 
 
 @app.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+def chat(request: ChatRequest, http_request: Request):
     """
     Answer one question.
 
     Three steps: turn the question into numbers, find the closest chunks,
     then ask Gemini to answer using only those chunks.
+
+    The rate-limit check comes first, before any work is done: each question
+    costs two Gemini calls (one to embed it, one to answer it), so a refused
+    request must not spend any of the free-tier quota.
     """
+    refuse_if_over_limit(ratelimit.check_chat, http_request)
+
     question = request.message.strip()
 
     if not question:
@@ -383,7 +409,7 @@ def chat(request: ChatRequest):
 
 
 @app.post("/lead")
-def lead(request: LeadIn):
+def lead(request: LeadIn, http_request: Request):
     """
     Accept a visitor's contact details (FR-08 to FR-10, FR-13).
 
@@ -392,6 +418,8 @@ def lead(request: LeadIn):
     A valid lead is sent to n8n, or kept on disk if n8n can't take it, so the
     visitor is always told it was received and no lead is ever lost.
     """
+    refuse_if_over_limit(ratelimit.check_lead, http_request)
+
     return handle_lead(request, N8N_WEBHOOK_URL, demo=LEADS_DEMO_MODE)
 
 
@@ -415,6 +443,7 @@ if __name__ == "__main__":
     print(f"  Prompt version: {PROMPT_VERSION}")
     print(f"  Leads go to:    {LEADS_GO_TO}")
     print(f"  Allowed origins: {ALLOWED_ORIGINS or DEFAULT_ORIGINS}")
+    print(f"  Rate limits:     {ratelimit.settings_summary()}")
     print()
     print("  Open http://127.0.0.1:8000/docs to try it.")
     print("  Press Ctrl+C to stop.")
