@@ -70,7 +70,8 @@ after the test has actually been run.
 | Tests | Result |
 |---|---|
 | RL-01..22 (`tests/test_rate_limit.py`) | **22 passed** |
-| `test_lead.py` + `test_rate_limit.py` together | **56 passed** |
+| `test_lead.py` + `test_rate_limit.py` in the build workspace | **56 passed** |
+| Full suite on the laptop, backend running (13 + 34 + 5 + 22) | **74 passed in 22.02 s**, 10:39 PKT |
 | Widget shows the 429 message, chat and form (Chromium, stand-in backend) | **Pass** |
 | AC-9 on the live Render service | **Not yet run** |
 
