@@ -105,11 +105,44 @@ after the test has actually been run.
 | `Retry-After` readable by the page (CORS-02) | **Pass** - `60` |
 | New `chat.js` published and running on the live site | **Pass** - 24,549 bytes |
 
+- Task 3.6: security checklist and live acceptance tests. Cloned the public
+  repository fresh and searched the working tree **and all 21 commits of
+  history** for keys, tokens, lead data and personal details. Nothing found.
+  Re-checked the acceptance criteria against the live system.
+- Wrote `docs/19_stage3_test_report.md`. Corrected `docs/14_github.md`.
+
+### What I learned (3.6)
+- Searching the working tree is not enough. A secret deleted in a later commit
+  is still readable in an earlier one, so the scan has to cover every commit.
+- The scan found an employer account name in `docs/14_github.md` - and that
+  same file claimed a search for it had found nothing. The earlier AC-8 pass
+  was recorded on an incomplete check. A checklist is only worth what the
+  checking was worth.
+- Not every finding is a secret. A username is not a credential, and rewriting
+  Git history to remove one costs every commit hash. Worth writing the choice
+  down rather than silently doing either.
+- Some things cannot be checked from where you are. Response headers are
+  hidden from a page on another origin, so that row says "not tested" instead
+  of "pass".
+
+### Tests executed (3.6)
+| Tests | Result |
+|---|---|
+| SEC-01..06, SEC-08..17 (secrets, history, CORS, Docker, n8n export, input limits, consent, HTTPS) | **Pass** |
+| SEC-07 work account name | **Finding** - text fixed, history remains |
+| SEC-18 `/docs` public | Deliberate, recorded |
+| SEC-19 response security headers | **Not tested** |
+| AC-3, AC-5 live | **Pass** |
+| AC-1 live | **Fail** - RET-04, unchanged |
+| AC-6 phone half | **Not run** |
+| NFR-01 speed live | **Pass** - 1.9 s and 2.0 s |
+
 ### Next task
-- 3.6: live tests and security checklist. AC-6 (phone) is still open.
+- Stage 4: 4.1 full system test and fixes. RET-04 (metadata filtering) is the
+  main piece of work waiting there.
 
 ### Progress
-22 of 28 tasks completed. Stage 3: 3.1-3.5 done.
+23 of 28 tasks completed. Stage 3 complete.
 
 ---
 

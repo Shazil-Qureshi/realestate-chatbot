@@ -75,7 +75,7 @@ Lesson: confirm a save by reading the result back, not by trusting the
 "written" message.
 
 **Push refused (403) for the wrong account.** Windows had a saved GitHub login
-for a work account (`rmaacaiintern-shazil`), and Git used it. Fixed by putting
+for a different work account, and Git used it. Fixed by putting
 the username in the remote address, so Git asks for that account's login and
 the work login stays untouched:
 
@@ -94,9 +94,17 @@ The owner then approved the sign-in in the browser.
 | GIT-03 | No API key in staged content | **Pass**: `git grep --cached` for the key pattern printed nothing |
 | GIT-04 | Commit author uses the private address | **Pass**: `Qazi Shazil Qureshi <253568843+Shazil-Qureshi@users.noreply.github.com>` |
 | GIT-05 | Push to GitHub | **Pass**: `* [new branch] main -> main`, commit `34e6139` |
-| API-05 / AC-8 | A fresh clone of the public repository contains no key, lead data or private email | **Pass**: cloned from GitHub without logging in, 54 files. A search for API-key, Google client-secret and token patterns, the Gmail address and the work account name found nothing. |
+| API-05 / AC-8 | A fresh clone of the public repository contains no key, lead data or private email | **Pass**: cloned from GitHub without logging in, 54 files. A search for API-key, Google client-secret and token patterns and the Gmail address found nothing. |
 
-AC-8 is checked again in Task 3.6, after the deployment files are added.
+AC-8 is checked again in Task 3.6, after the deployment files are added. See
+[19](19_stage3_test_report.md).
+
+**Correction made in 3.6.** The AC-8 row above originally also claimed that a
+search for the work account name found nothing. That was wrong: the name was
+written into this very document, two paragraphs up, as part of recording the
+403 incident. The 3.6 scan found it. The name has now been removed from the
+text above, and the claim has been removed from the row. It remains in the Git
+history of this file, which is discussed in [19](19_stage3_test_report.md).
 
 ## If a secret is ever committed
 

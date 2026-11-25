@@ -45,7 +45,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 | 3.3 | Backend hosting on Render free — live at https://realestate-chatbot-4707.onrender.com; /health, /chat, /lead (demo) and wake-after-sleep (DOCK-07, AC-10) Pass, 24 Nov; `docs/16_render.md` | Completed |
 | 3.4 | Website on GitHub Pages — live at <https://shazil-qureshi.github.io/realestate-chatbot/>, widget calls the Render backend; PAGE-01..10 Pass (25 Nov); `docs/17_github_pages.md` | Completed |
 | 3.5 | CORS and rate limiting — CORS verified live in 3.4; rate limiting with no new package, RL-01..22 Pass, 74 tests green, **AC-9 Pass on the live service** (10 allowed, 11th refused, 25 Nov); `docs/18_rate_limiting.md` | Completed |
-| 3.6 | Live tests and security checklist | Not Started |
+| 3.6 | Live tests and security checklist — SEC-01..19 (17 Pass, 1 finding, 1 not verifiable), live AC re-check; no secret in the tree or in 21 commits of history; `docs/19_stage3_test_report.md` | Completed |
 
 ## Stage 4 – Finalisation and portfolio (Day 4)
 
@@ -69,6 +69,8 @@ Status values: Not Started · In Progress · Completed · Blocked
 | THR-01 | Relevance threshold | 1.8 | Measured: out-of-scope ≈ 0.44, in-scope ≤ 0.29. A 0.40 cut-off is now justifiable as a quota saving. Deferred to Stage 3; it cannot detect in-scope gaps and adds a false-rejection risk. |
 | RET-02 | Retrieval can miss a chunk the answer needs (the offices chunk was absent for the Lahore question) | 1.8 | Mitigated by rule 8. A broader fix would be metadata filtering or a larger `TOP_K`. |
 | RATE-01 | Free-tier requests-per-minute and per-day for this account | 1.5 | **Closed for design 25 Nov** — Google's docs no longer publish per-model free-tier numbers; they are per account at <https://aistudio.google.com/rate-limit>. The limiter no longer depends on them: it sets its own caps, all env-tunable. Still worth reading the number once to tune `RATE_CHAT_TOTAL_PER_DAY`. |
+| SEC-07 | An employer GitHub account name was in `docs/14_github.md`, and that file also wrongly claimed a search for it found nothing | 3.6 | **Partly closed 25 Nov** — removed from the text and the false claim corrected. Still in that file's Git history (20 commits). Rewriting history is the owner's call. |
+| SEC-19 | HTTP response security headers never verified (CORS hides them from the page; the workspace cannot reach the host) | 3.6 | Open — not tested, not a pass |
 | AC-6 | Live demo not yet opened on a real phone (laptop half is Pass) | 3.4 | Open — one question from a phone browser |
 | PAGES-01 | GitHub Pages stopped republishing: "No artifacts named github-pages were found" while the artifact was plainly created | 3.5 | **Closed 25 Nov** — fixed by adding `actions: read` and splitting upload and deploy into two jobs. Both applied together, so which one was the cause is unconfirmed. New `chat.js` is live. |
 | CORS-02 | `expose_headers=["Retry-After"]` | 3.5 | **Closed 25 Nov** — verified live: a refused request returned a readable `Retry-After: 60` |
@@ -76,6 +78,6 @@ Status values: Not Started · In Progress · Completed · Blocked
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 22 of 28 tasks completed.** Stages 1 and 2 complete. Stage 3: 3.1–3.5 done, 3.6 (live tests and security checklist) next.
+**Progress: 23 of 28 tasks completed.** Stages 1, 2 and 3 complete. Stage 4 (finalisation and portfolio) next. AC-6 (phone) is the one acceptance criterion still unrun.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).
