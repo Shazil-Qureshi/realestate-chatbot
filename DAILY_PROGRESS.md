@@ -250,12 +250,30 @@ after the test has actually been run.
 | Live prompt version and area filtering | `2026-11-25a`, 12 areas |
 | Latency, five live questions | 1.7 / 1.8 / 2.0 / 2.1 / 10.1 s |
 
+- Task 4.4: wrote `docs/23_final_report.md` and
+  `docs/24_portfolio_and_linkedin.md` (CV entry, portfolio description, two
+  LinkedIn drafts).
+- Fixed the tracker's own "Last updated" line, which still said 16 November
+  while the file held content from the 25th.
+
+### What I learned (4.4)
+- Writing the report meant reading the tracker end to end, which is the only
+  reason the stale date was noticed. A document nobody re-reads rots quietly.
+- The report is stronger for leading with the defect rather than the feature
+  list. RET-04 took a week, survived two confident wrong diagnoses, and turned
+  out to be two faults in two layers - one of them in an instruction I wrote.
+  That is more convincing than any list of technologies.
+- Section 6 lists eight things still open. Writing them down is the point: a
+  gap you listed reads as care, the same gap found by someone else does not.
+- The LinkedIn drafts lead with the bug, not with "excited to announce",
+  because a specific failure is what makes a technical reader stop scrolling.
+
 ### Next task
-- Record the video and capture the eight screenshots, then 4.4: final report,
-  portfolio and LinkedIn text.
+- 4.5: internship progress report. Then the video recording and the phone test
+  for AC-6.
 
 ### Progress
-25 of 28 tasks completed. 4.3 script written; recording is outstanding.
+26 of 28 tasks completed. 4.3 awaits a recording; 4.5 is the last task.
 
 ---
 
