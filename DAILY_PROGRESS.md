@@ -75,12 +75,41 @@ after the test has actually been run.
 | Widget shows the 429 message, chat and form (Chromium, stand-in backend) | **Pass** |
 | AC-9 on the live Render service | **Not yet run** |
 
+- Ran AC-9 against the live service: 11 questions in 3 seconds, 10 answered,
+  the 11th refused with a clear message. Then LIVE-01..08 end to end from the
+  live website using `/lead` (no Gemini cost).
+- Fixed GitHub Pages, which had silently stopped republishing since the
+  morning, so the live site was still the 24 Nov build.
+
+### What I learned (deployment)
+- **Three wrong diagnoses in a row, each one confident.** "Transient, re-run
+  it" - failed. "Wrong action versions" - failed, and the run's own warning
+  disproved it. Only the third attempt (`actions: read` plus splitting upload
+  and deploy into two jobs) worked, and because both were applied at once, the
+  real cause is still unconfirmed. Saying so is better than claiming the last
+  idea was right.
+- A green tick in Settings is not proof the new file is being served: the
+  browser had `chat.js` cached for about ten minutes. Worse, `chat.js?cb=123`
+  is a *different* cache entry from `chat.js`, so the obvious cache-buster
+  refreshed the wrong one.
+- Checking "does this tag exist" is not checking "do these versions work
+  together".
+- A fetch result can be cached too: `/health` looked unchanged after a deploy
+  purely because the same URL had been fetched minutes earlier.
+
+### Tests executed (live, 3.5)
+| Tests | Result |
+|---|---|
+| AC-9 on the live service (11 chat questions in 3 s) | **Pass** - 10 allowed, 1 refused |
+| LIVE-01..08 (lead limit, message, Retry-After, countdown, window reset) | **Pass** |
+| `Retry-After` readable by the page (CORS-02) | **Pass** - `60` |
+| New `chat.js` published and running on the live site | **Pass** - 24,549 bytes |
+
 ### Next task
-- Deploy, then run AC-9 against the live demo; then 3.6 (live tests and
-  security checklist).
+- 3.6: live tests and security checklist. AC-6 (phone) is still open.
 
 ### Progress
-21 of 28 tasks completed. 3.5 is in progress: code done, live check pending.
+22 of 28 tasks completed. Stage 3: 3.1-3.5 done.
 
 ---
 

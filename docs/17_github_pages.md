@@ -5,7 +5,7 @@
 | **Task** | 3.4 Publish the website and point the widget at the live backend |
 | **Date** | 25 November 2026 |
 | **Requirements** | FR-15 (public live demo), AC-6 |
-| **Status** | **Completed** 25 Nov. Live at <https://shazil-qureshi.github.io/realestate-chatbot/>, calling the Render backend. AC-6 is half checked: laptop Pass, phone still to do. |
+| **Status** | **Completed** 25 Nov. Live at <https://shazil-qureshi.github.io/realestate-chatbot/>, calling the Render backend. Publishing broke and was fixed the same day (below). AC-6: laptop Pass, phone still to do. |
 
 ## Terms
 
@@ -56,11 +56,19 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/configure-pages@v6
-      - uses: actions/upload-pages-artifact@v5
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - id: deploy
         uses: actions/deploy-pages@v5
 ```
@@ -75,9 +83,77 @@ Line by line:
 | `concurrency` | Two pushes close together cannot publish on top of each other. `cancel-in-progress: false` lets a running publish finish. |
 | `path: web` | The part that makes `web/` the site root. |
 
-The action versions were checked against the live repositories on 24 November
-2026 (`checkout` v7, `configure-pages` v6, `upload-pages-artifact` v5,
-`deploy-pages` v5) rather than copied from memory.
+### Publishing failed, and the first two diagnoses were wrong
+
+Runs #2, #3 and #4 on 25 November all failed with the same error:
+
+```
+Error: No artifacts named "github-pages" were found for this workflow run.
+Ensure artifacts are uploaded with actions/upload-artifact@v4 or later.
+```
+
+Each run page showed the artifact **had** been created: `github-pages`,
+about 65 KB. So the upload worked and the deploy step could not see it.
+
+| Attempt | What was thought | What happened |
+|---|---|---|
+| Re-run (#3) | GitHub's own error text suggests a transient API problem, so re-run it | Failed identically. Not transient. |
+| Version pairing (#4) | The first workflow used the newest major tag of each action, which proves only that the tags **exist**, not that they work together. Changed to GitHub's starter pairing: `checkout` v4, `configure-pages` v5, `upload-pages-artifact` **v3**, `deploy-pages` v5 | Failed identically. The run's own warning showed `upload-pages-artifact@v3` uses `upload-artifact@v4` internally - already what the error asks for. So the versions were not the cause either. |
+
+githubstatus.com reported **All Systems Operational** throughout, so it was
+not a declared outage.
+
+### What the workflow does now
+
+The cause is still not confirmed. Two fixes are applied together, because the
+reports of this error upstream divide between exactly these two, and each is
+harmless on its own:
+
+1. **`actions: read` added to `permissions`.** Listing permissions at all sets
+   every scope that is not listed to `none`. `deploy-pages` asks the Actions
+   API for this run's artifacts, and without that scope the answer can come
+   back as an empty list - which is precisely the error: the artifact is
+   there, and the question about it returns nothing.
+2. **Upload and deploy split into two jobs** joined by `needs: build`. In a
+   single job the deploy step can ask for the artifact before it has been
+   listed and lose the race. GitHub's own Jekyll starter workflow is laid out
+   this way.
+
+Versions stay on the starter pairing, which is correct whatever the cause.
+
+**It worked.** Run #5 went green and Settings -> Pages showed "Your site is
+live ... Last deployed 1 minute ago". The new `web/chat.js` (24,549 bytes) was
+being served, confirmed by fetching it from the live site and finding the new
+code in it.
+
+Because both fixes were applied at once, **which of the two was the real cause
+is not known.** Keeping both is the honest and safe choice: `actions: read` is
+a permission the deploy step genuinely needs to list artifacts, and separate
+jobs are how GitHub's own Jekyll starter is laid out. Neither is a workaround.
+
+**The lessons:**
+
+1. For actions that hand data to each other, the newest tag of each is not the
+   right choice. "The tag exists" is a much weaker check than it looks.
+2. A fix that sounds right is not a fix until the run goes green. Two were not.
+3. When two plausible fixes are applied together and it works, say that the
+   cause is unconfirmed rather than claiming the last idea was right.
+
+### A caching trap worth knowing
+
+After publishing, the live page still behaved like the old version. The file
+on the server was new; the **browser** had the old one. GitHub Pages serves
+`chat.js` with a cache lifetime of about ten minutes.
+
+The first attempt to force a refresh failed in an instructive way: fetching
+`chat.js?cb=12345` refreshes the cache entry for *that* address, which is a
+different entry from plain `chat.js`. Fetching `chat.js` with no query, using
+`{cache: "reload"}`, replaced the right entry and the page then ran the new
+code.
+
+So after any website change, visitors with a warm cache keep the old files for
+up to ten minutes. This is normal, and worth remembering before concluding a
+deployment failed.
 
 ## The one change to the website
 

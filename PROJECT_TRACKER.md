@@ -70,8 +70,8 @@ Status values: Not Started · In Progress · Completed · Blocked
 | RET-02 | Retrieval can miss a chunk the answer needs (the offices chunk was absent for the Lahore question) | 1.8 | Mitigated by rule 8. A broader fix would be metadata filtering or a larger `TOP_K`. |
 | RATE-01 | Free-tier requests-per-minute and per-day for this account | 1.5 | **Closed for design 25 Nov** — Google's docs no longer publish per-model free-tier numbers; they are per account at <https://aistudio.google.com/rate-limit>. The limiter no longer depends on them: it sets its own caps, all env-tunable. Still worth reading the number once to tune `RATE_CHAT_TOTAL_PER_DAY`. |
 | AC-6 | Live demo not yet opened on a real phone (laptop half is Pass) | 3.4 | Open — one question from a phone browser |
-| PAGES-01 | The live website still serves the old `web/chat.js`, so visitors see the older 429 wording | 3.5 | Open — check the Pages Actions run |
-| CORS-02 | `expose_headers=["Retry-After"]` added after the live AC-9 test; not yet verified on the live service | 3.5 | Open — verify after the next deploy |
+| PAGES-01 | GitHub Pages stopped republishing: "No artifacts named github-pages were found" while the artifact was plainly created | 3.5 | **Closed 25 Nov** — fixed by adding `actions: read` and splitting upload and deploy into two jobs. Both applied together, so which one was the cause is unconfirmed. New `chat.js` is live. |
+| CORS-02 | `expose_headers=["Retry-After"]` | 3.5 | **Closed 25 Nov** — verified live: a refused request returned a readable `Retry-After: 60` |
 | RET-04 | AC-1 fails: "3-bedroom houses in DHA?" misses BRE-S-102 (the only DHA listing); bedroom words outrank the area | 2.5 | Open — metadata filtering (area, bedrooms, sale/rent) in Stage 4; add a regression test |
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |

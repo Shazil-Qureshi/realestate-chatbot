@@ -5,7 +5,7 @@
 | **Task** | 3.5 CORS and rate limiting |
 | **Date** | 25 November 2026 |
 | **Requirements** | NFR-04, AC-9 |
-| **Status** | **Completed** 25 Nov. AC-9 passed against the live service. Two follow-ups below: the live website is still serving the old `chat.js`, and the `Retry-After` CORS fix needs the next deploy. |
+| **Status** | **Completed** 25 Nov. AC-9 passed against the live service, and LIVE-01..08 passed end to end from the live website. |
 
 CORS, the other half of 3.5, was already in place and was verified in use
 during 3.4. See [17](17_github_pages.md).
@@ -213,22 +213,38 @@ header, but a browser hides every response header from JavaScript unless the
 server names it in `Access-Control-Expose-Headers`. `expose_headers=["Retry-After"]`
 has been added to the CORS settings. Nothing was broken by this: the widget
 reads the message text, not the header. It is only now that the header is
-usable at all, for example to show a countdown later. **Not yet verified on the
-live service** - that needs the next deploy.
+usable at all, for example to show a countdown later.
 
-**2. The live website was still serving the old `web/chat.js`.** The new file
-is in the repository (commit `c75bf1b`), but GitHub Pages had not republished
-it, so the widget showed its older fallback wording - "Too many questions in a
-short time. Wait a minute, then try again." - instead of the server's exact
-one. Both are clear, so AC-9 still passes, but the improvement is not visible
-to visitors until Pages republishes.
+**Verified live** at 11:05 PKT on 25 November: a refused `/lead` request
+returned `Retry-After: 60`, readable from the page's JavaScript.
+
+**2. The live website was still serving the old `web/chat.js`.** Publishing to
+GitHub Pages had been failing since the morning. That was tracked down and
+fixed - see [17](17_github_pages.md) - and the new file is now live.
+
+## Live check of the whole path, 25 November, 11:03-11:08 PKT
+
+Run from the live website against the live Render backend, after confirming
+the page was running the newly published `chat.js`. `/lead` was used rather
+than `/chat` because a demo lead costs no Gemini quota.
+
+| ID | Check | Result |
+|---|---|---|
+| LIVE-01 | Five leads inside a minute are accepted and discarded | **Pass** - all five returned `"demo": true` |
+| LIVE-02 | The sixth is refused | **Pass** - 429 |
+| LIVE-03 | The refusal carries the right message | **Pass** - "Too many form submissions. Please wait 60 seconds and try again." |
+| LIVE-04 | `Retry-After` is readable by the page | **Pass** - `60` |
+| LIVE-05 | The widget shows the server's own wording | **Pass** - "Too many form submissions. Please wait 4 seconds and try again." |
+| LIVE-06 | The wait counts down as the window slides | **Pass** - 60 s at the start, 4 s near the end of the window |
+| LIVE-07 | The allowance returns after the window | **Pass** - a submission a minute later was accepted and discarded |
+| LIVE-08 | Refused requests are not counted | **Pass** - five extra refusals did not push the wait out |
+
+All test leads were fictional, and demo mode discarded every one.
 
 ## Not yet done
 
 | Item | Why |
 |---|---|
-| GitHub Pages serving the new `chat.js` | The Actions run needs checking; until then visitors see the older 429 wording |
-| `expose_headers=["Retry-After"]` verified live | Needs the next deploy |
 | Tuning `RATE_CHAT_TOTAL_PER_DAY` to the real quota | Needs the number from <https://aistudio.google.com/rate-limit> (RATE-01) |
 
 ## Files changed
