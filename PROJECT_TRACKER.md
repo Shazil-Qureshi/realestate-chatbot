@@ -52,7 +52,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 | ID | Task | Status |
 |---|---|---|
 | 4.1 | Full system test and fixes — area filtering for RET-04 **plus** system-instruction rule 10 for near matches; **AC-1 Pass**, 14/14 chat tests, 110 in total; `docs/20_area_filtering.md` | Completed |
-| 4.2 | README, diagrams, API documentation | Not Started |
+| 4.2 | README, diagrams, API documentation — README rewritten for a reviewer with two Mermaid diagrams (both rendered and checked); `docs/21_api_reference.md` | Completed |
 | 4.3 | Demo video script and screenshots | Not Started |
 | 4.4 | Final report, portfolio and LinkedIn text | Not Started |
 | 4.5 | Internship progress report | Not Started |
@@ -78,6 +78,6 @@ Status values: Not Started · In Progress · Completed · Blocked
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 24 of 28 tasks completed.** Stages 1–3 complete. Stage 4: 4.1 done, 4.2 (README, diagrams, API docs) next. AC-6 (phone) is the one acceptance criterion still unrun.
+**Progress: 25 of 28 tasks completed.** Stages 1–3 complete. Stage 4: 4.1 and 4.2 done, 4.3 (demo video script and screenshots) next. AC-6 (phone) is the one acceptance criterion still unrun.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).

@@ -197,11 +197,39 @@ after the test has actually been run.
 | CHAT-12 / AC-1 | **Pass** - "We do not have any 3-bedroom houses in DHA. The only property we have in DHA is a 4-bedroom house: BRE-S-102" |
 | CHAT-03, CHAT-05 (would catch an over-loosened rule 3) | **Pass** |
 
+- Task 4.2: rewrote `README.md` for someone deciding in thirty seconds whether
+  this project is worth reading - live link first, then what to ask it, then
+  the decisions worth arguing about. Added two Mermaid diagrams and
+  `docs/21_api_reference.md`.
+
+### What I learned (4.2)
+- The old README listed Hugging Face Spaces, which the project left a week
+  ago, and never linked the live demo at all. A README drifts out of date
+  faster than code, because nothing fails when it is wrong.
+- Mermaid renders on GitHub but a syntax slip shows as a broken block, so both
+  diagrams were compiled and **looked at** as images before being committed.
+  The first architecture diagram was valid and still bad: the ingest arrow cut
+  across the runtime flow. Putting the build-time path in its own subgraph
+  fixed it.
+- Writing the API reference caught a documentation error I was about to ship:
+  a 422 from FastAPI has `detail` as a **list** of error objects, not a
+  string. I had written the string version from memory; the live test output
+  from earlier in the day showed otherwise.
+- Known limitations are in the README, not buried in the tracker. A reviewer
+  who finds a gap you listed thinks you are careful; one who finds a gap you
+  hid thinks the opposite.
+
+### Tests executed (4.2)
+| Tests | Result |
+|---|---|
+| Both README Mermaid diagrams compiled with mmdc | **Pass** - and inspected as images |
+| API reference checked against the code, not memory | 2 corrections made (422 shape, 503 wording) |
+
 ### Next task
-- 4.2: README, diagrams and API documentation.
+- 4.3: demo video script and screenshots.
 
 ### Progress
-24 of 28 tasks completed. 4.1 complete.
+25 of 28 tasks completed. 4.2 complete.
 
 ---
 
