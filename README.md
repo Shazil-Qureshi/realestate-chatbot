@@ -7,6 +7,11 @@ to a human through an automated lead workflow.
 
 **[Try the live demo →](https://shazil-qureshi.github.io/realestate-chatbot/)**
 
+![The chatbot asked for a 3-bedroom house in DHA, where none exists: it says so, then offers the 4-bedroom house that is there](docs/images/bella-chatbot-demo.gif)
+
+*Recorded from the live site. There is no 3-bedroom house in DHA — so it says
+so, and offers the one property that is there.*
+
 > Bella Real Estate is **fictional**. Every property, price and policy in this
 > repository was written for this demonstration. No real customer data is
 > involved anywhere.
