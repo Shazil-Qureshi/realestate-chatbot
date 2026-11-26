@@ -5,7 +5,7 @@
 | **Task** | 3.4 Publish the website and point the widget at the live backend |
 | **Date** | 25 November 2026 |
 | **Requirements** | FR-15 (public live demo), AC-6 |
-| **Status** | **Completed** 25 Nov. Live at <https://shazil-qureshi.github.io/realestate-chatbot/>, calling the Render backend. Publishing broke and was fixed the same day (below). AC-6: laptop Pass, phone still to do. |
+| **Status** | **Completed** 25 Nov. Live at <https://shazil-qureshi.github.io/realestate-chatbot/>, calling the Render backend. Publishing broke and was fixed the same day (below). AC-6 passes on both laptop and phone. |
 
 ## Terms
 
@@ -218,12 +218,10 @@ up to about a minute, which the widget covers with its "Waking up…" message
 
 | ID | Criterion | Result |
 |---|---|---|
-| AC-6 | The live demo answers questions from a public URL on both a laptop and a phone | **Half done.** Laptop: Pass (above). Phone: **not yet run.** |
+| AC-6 | The live demo answers questions from a public URL on both a laptop and a phone | **Pass.** Laptop verified above. Phone verified 26 Nov by the project owner. |
 | FR-15 | Public live demo | **Pass** — website and backend both public |
 
-AC-6 stays open until the site is opened on a real phone. The 375 px checks in
-2.5 were done in a desktop browser shrunk to phone size, which is not the same
-as a phone.
+AC-6 is now complete. Run by the project owner on a real phone, 26 November 2026: the site loaded and the chatbot answered a question. Reported rather than observed here, and recorded as such. The 375 px checks in 2.5 were done in a desktop browser shrunk to phone size, which is why they were never accepted as the phone half.
 
 ## Problems met
 
@@ -237,6 +235,5 @@ as a phone.
 
 | ID | Item |
 |---|---|
-| AC-6 | Open the live site on a phone and ask one question |
 | 3.5 | Rate limiting still to do. The CORS half of 3.5 is already in place and now verified in use. |
 | RET-04, LEAD-R1, N8N-S1, RATE-01 | Unchanged |

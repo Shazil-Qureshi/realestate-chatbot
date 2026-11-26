@@ -1,6 +1,6 @@
 # Project Tracker
 
-Last updated: 26 November 2026 (09:50 PKT)
+Last updated: 26 November 2026 (10:00 PKT)
 
 Status values: Not Started · In Progress · Completed · Blocked
 
@@ -72,13 +72,13 @@ Status values: Not Started · In Progress · Completed · Blocked
 | SEC-07 | An employer GitHub account name was in `docs/14_github.md`, and that file also wrongly claimed a search for it found nothing | 3.6 | **Partly closed 25 Nov** — removed from the text and the false claim corrected. Still in that file's Git history (20 commits). Rewriting history is the owner's call. |
 | SEC-19 | HTTP response security headers never verified (CORS hides them from the page; the workspace cannot reach the host) | 3.6 | Open — not tested, not a pass |
 | NFR-01 | One live answer took 10.1 s against a "within 10 seconds" requirement; the other four in the same run took 1.7–2.1 s | 4.3 | Open — watch it. Median is ~2 s, so this is an outlier rather than a trend, but it is on the limit. |
-| AC-6 | Live demo not yet opened on a real phone (laptop half is Pass) | 3.4 | Open — one question from a phone browser |
+| AC-6 | Live demo on a real phone | 3.4 | **Closed 26 Nov** — opened on a phone by the project owner; page loaded and a question was answered. All 10 acceptance criteria now pass. |
 | PAGES-01 | GitHub Pages stopped republishing: "No artifacts named github-pages were found" while the artifact was plainly created | 3.5 | **Closed 25 Nov** — fixed by adding `actions: read` and splitting upload and deploy into two jobs. Both applied together, so which one was the cause is unconfirmed. New `chat.js` is live. |
 | CORS-02 | `expose_headers=["Retry-After"]` | 3.5 | **Closed 25 Nov** — verified live: a refused request returned a readable `Retry-After: 60` |
 | RET-04 | AC-1 failed: "3-bedroom houses in DHA?" missed BRE-S-102 | 2.5 | **Closed 25 Nov** — needed two fixes: area metadata + area-restricted search, and a change to system-instruction rule 3, which had forbidden near matches outright. AC-1 verified passing (CHAT-12). |
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 27 of 27 applicable tasks completed** (4.5 dropped as not applicable). Stages 1–3 complete. Stage 4: 4.1, 4.2 and 4.4 done. **Only 4.3 remains: the demo video recording and screenshots.** AC-6 (phone) is the one acceptance criterion still unrun.
+**Progress: 27 of 27 applicable tasks completed** (4.5 dropped as not applicable). Stages 1–3 complete. Stage 4: 4.1, 4.2 and 4.4 done. **Only 4.3 remains: the demo video recording and screenshots.** **All 10 acceptance criteria pass** (AC-6 closed 26 Nov).
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).

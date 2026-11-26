@@ -7,7 +7,7 @@
 | **Period** | 13 – 25 November 2026 |
 | **Repository** | <https://github.com/Shazil-Qureshi/realestate-chatbot> |
 | **Live demo** | <https://shazil-qureshi.github.io/realestate-chatbot/> |
-| **Status at this report** | 26 of 28 tasks complete. One acceptance criterion unrun, one partly met. |
+| **Status at this report** | 27 of 27 applicable tasks complete. **All 10 acceptance criteria pass.** Demo recording outstanding. |
 
 ## 1. What the project set out to do
 
@@ -42,17 +42,18 @@ project, with deliberate gaps so that "I don't know" could be tested properly.
 | AC-3 | A plausible but absent fact gets "I don't know", not a guess | **Pass** |
 | AC-4 | Consent leads to a Google Sheets row and an email | **Pass** — on the real path, locally |
 | AC-5 | Empty name or phone "abc" rejected clearly | **Pass** |
-| AC-6 | The live demo works from a public URL on a laptop **and a phone** | **Partly met** — laptop verified; phone **not run** |
+| AC-6 | The live demo works from a public URL on a laptop **and a phone** | **Pass** — laptop verified here; phone verified by the project owner, 26 Nov |
 | AC-7 | A broken webhook still allows normal chat | **Pass** — lead queued, chat unaffected |
 | AC-8 | No API key findable in the public repository | **Pass** — tree *and* all 21 commits of history searched |
 | AC-9 | Exceeding the rate limit gives a clear message | **Pass** — verified live |
 | AC-10 | Restarting the hosted backend needs no manual step | **Pass** |
 
-**Nine of ten pass. One is half met and is recorded as such.**
+**All ten pass.**
 
-AC-6 needs one minute on a real phone. The 375-pixel checks were done in a
-desktop browser shrunk to phone size, which is not the same thing, so it is not
-claimed as a pass.
+AC-6 was the last to close, on 26 November, when the site was opened on a real
+phone and answered a question. It had deliberately been left open until then:
+the earlier 375-pixel checks were done in a desktop browser reduced to phone
+size, which is not the same thing and was never accepted as the phone half.
 
 ## 4. The defect worth writing about
 
@@ -112,7 +113,6 @@ incident written up in `docs/16_render.md` without reproducing the secret.
 
 | ID | Item | Why it matters |
 |---|---|---|
-| AC-6 | Phone test not run | The only acceptance criterion not fully met |
 | NFR-01 | One live answer took 10.1 s against a 10 s requirement; four others took 1.7–2.1 s | An outlier, not a trend, but on the limit |
 | LEAD-R1 | Queued leads are not re-sent | A lead saved during an outage needs manual recovery |
 | N8N-S1 | The lead webhook has no shared secret | Not publicly reachable, but unauthenticated |

@@ -298,12 +298,23 @@ after the test has actually been run.
   myself" was a sign the addressee did not exist, not a formatting preference.
   Ask what something is for before asking how to format it.
 
+### AC-6 closed, 26 November
+- The project owner opened the live site on a real phone and the chatbot
+  answered a question. **AC-6 passes, so all 10 acceptance criteria now pass.**
+- Recorded as reported rather than observed: I did not run it myself, and the
+  documents say so.
+- I checked before writing it down. "It is working fine" could have meant the
+  page loaded, which is not what AC-6 asks for - the criterion is that it
+  *answers questions* on a phone, and a cross-origin call from mobile Safari
+  is exactly the thing that can fail while the page still looks perfect. One
+  question settled it.
+
 ### Next task
-- Record the demo video and capture the eight screenshots (4.3), and open the
-  live site on a phone to close AC-6.
+- Record the demo video and capture the eight screenshots (4.3).
 
 ### Progress
-27 of 27 applicable tasks completed. Only the demo recording remains.
+27 of 27 applicable tasks completed. All 10 acceptance criteria pass. Only the
+demo recording remains.
 
 ---
 

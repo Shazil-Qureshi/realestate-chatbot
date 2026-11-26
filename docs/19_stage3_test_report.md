@@ -111,7 +111,7 @@ low, but the gap is real and is carried forward.
 | AC-2 | Off-topic question declined | Live widget, 11:00 PKT ([18](18_rate_limiting.md)) | **Pass** - "I can only help with questions about Bella Real Estate, property, or renting and buying homes." |
 | AC-3 | No invented Karachi address | Live `/chat` | **Pass** - "Bella Real Estate operates only in Islamabad and Rawalpindi. We do not operate in Karachi." 1.9 s |
 | AC-5 | Empty name and phone "abc" rejected clearly | Live `/lead` | **Pass** - "Enter your name." / "Enter a phone number with 10 to 15 digits, for example 0300 1234567." |
-| AC-6 | Live demo works on a laptop **and a phone** | Laptop: live, Chrome. Phone: **not run** | **Half** - laptop Pass, phone outstanding |
+| AC-6 | Live demo works on a laptop **and a phone** | Laptop: live, Chrome. Phone: by the project owner, 26 Nov | **Pass** - both halves |
 | AC-9 | Rate limit returns a clear message | [18](18_rate_limiting.md) | **Pass** |
 | AC-10 | Restart or wake needs no manual step | [16](16_render.md) | **Pass** |
 
@@ -145,7 +145,6 @@ covers with its "Waking up..." message (tested in 3.3).
 
 | ID | Item |
 |---|---|
-| AC-6 | Open the live site on a phone and ask one question |
 | RET-04 | AC-1: area + bedrooms question misses the only DHA listing. Metadata filtering, Stage 4 |
 | RATE-01 | Read the real free-tier quota from AI Studio and tune `RATE_CHAT_TOTAL_PER_DAY` from its conservative 500 |
 | SEC-07 | Decide whether to rewrite Git history to remove the work account name, or accept it |

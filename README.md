@@ -173,7 +173,6 @@ Written down rather than left to be discovered.
 | Queued leads are not retried | If n8n is down a lead is written to `pending.jsonl` and stays there. Re-sending is manual. (LEAD-R1) |
 | The lead webhook has no shared secret | Anything that can reach it could post to it. It is not exposed publicly. (N8N-S1) |
 | Rate limits are self-imposed | Google no longer publishes free-tier numbers per model, so the caps are conservative guesses rather than matched to a real quota. (RATE-01) |
-| Not yet tested on a real phone | The widget is verified at phone size in a desktop browser, which is not the same thing. (AC-6) |
 | Response security headers unverified | They cannot be read from another origin, and could not be checked from the build environment. Recorded as untested, not as passing. (SEC-19) |
 | First answer after sleep is slow | Free tier. Up to about a minute, handled in the widget. |
 
