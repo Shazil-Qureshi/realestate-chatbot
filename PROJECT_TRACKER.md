@@ -1,6 +1,6 @@
 # Project Tracker
 
-Last updated: 25 November 2026 (22:40 PKT)
+Last updated: 26 November 2026 (09:50 PKT)
 
 Status values: Not Started · In Progress · Completed · Blocked
 
@@ -55,7 +55,7 @@ Status values: Not Started · In Progress · Completed · Blocked
 | 4.2 | README, diagrams, API documentation — README rewritten for a reviewer with two Mermaid diagrams (both rendered and checked); `docs/21_api_reference.md` | Completed |
 | 4.3 | Demo video script and screenshots — timed script with measured latencies and a pre-record safety checklist; 8-shot screenshot list; `docs/22_demo.md`. **Recording and capture are the owner's to do.** | In Progress |
 | 4.4 | Final report, portfolio and LinkedIn text — `docs/23_final_report.md` (results against all 10 acceptance criteria, defects, what is still open, what I would do differently) and `docs/24_portfolio_and_linkedin.md` (CV entry, portfolio text, two LinkedIn drafts) | Completed |
-| 4.5 | Internship progress report | Not Started |
+| 4.5 | ~~Internship progress report~~ — **Not applicable.** This is a personal portfolio project, not an internship deliverable, so there is no supervisor to report to. `docs/23_final_report.md` is the project's report. Planned in the original roadmap on a wrong assumption and removed on 26 Nov. | Dropped |
 
 ## Open follow-ups
 
@@ -79,6 +79,6 @@ Status values: Not Started · In Progress · Completed · Blocked
 | LEAD-R1 | Leads saved to `pending.jsonl` during an n8n outage are not re-sent automatically | 2.4 | Open — resend script or manual step in Stage 3 |
 | N8N-S1 | Webhook has no secret; Google tokens expire every 7 days in Testing mode | 2.4 | Open — secret header and hosting decided in Stage 3 |
 
-**Progress: 26 of 28 tasks completed.** Stages 1–3 complete. Stage 4: 4.1, 4.2 and 4.4 done; 4.3 script written with recording outstanding; 4.5 next. AC-6 (phone) still unrun.
+**Progress: 27 of 27 applicable tasks completed** (4.5 dropped as not applicable). Stages 1–3 complete. Stage 4: 4.1, 4.2 and 4.4 done. **Only 4.3 remains: the demo video recording and screenshots.** AC-6 (phone) is the one acceptance criterion still unrun.
 
 Session history is kept in [`DAILY_PROGRESS.md`](DAILY_PROGRESS.md).

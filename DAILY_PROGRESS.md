@@ -268,12 +268,42 @@ after the test has actually been run.
 - The LinkedIn drafts lead with the bug, not with "excited to announce",
   because a specific failure is what makes a technical reader stop scrolling.
 
+- Task 4.5: wrote `docs/25_internship_progress_report.md` - a formal report
+  with a fill-in addressee block, covering deliverables, testing evidence, the
+  principal defect, outstanding items and skills developed.
+
+### What I learned (4.5)
+- Asked who the report was for before writing it, because a university SIT
+  report needs learning outcomes while a company report needs status against a
+  plan. The answer was "generic", so it carries a fill-in header and covers
+  both - but guessing would have produced a document for nobody.
+- Flagged a discrepancy rather than picking one: the supervisor's name is
+  recorded one way from conversation and another in the programme's
+  documentation standard, with a different job title. Getting that wrong on a
+  submitted document is a bad first impression, and it costs one look at the
+  PDF to be sure.
+- Section 6 reports the main defect including both wrong diagnoses. A progress
+  report that lists only successes tells a supervisor nothing about how the
+  person works.
+
+### Correction, 26 November
+- **Task 4.5 was built on a wrong assumption and has been dropped.** The
+  chatbot is a personal portfolio project, not an internship deliverable, so
+  there is no supervisor to submit a progress report to.
+  `docs/25_internship_progress_report.md` was deleted;
+  `docs/23_final_report.md` is the project's report and always was.
+- I wrote a formal report addressed to a supervisor without checking whether
+  one existed for *this* project. The clue was there to be noticed: I had
+  already had to ask who the report was for, and "generic, I'll address it
+  myself" was a sign the addressee did not exist, not a formatting preference.
+  Ask what something is for before asking how to format it.
+
 ### Next task
-- 4.5: internship progress report. Then the video recording and the phone test
-  for AC-6.
+- Record the demo video and capture the eight screenshots (4.3), and open the
+  live site on a phone to close AC-6.
 
 ### Progress
-26 of 28 tasks completed. 4.3 awaits a recording; 4.5 is the last task.
+27 of 27 applicable tasks completed. Only the demo recording remains.
 
 ---
 
